@@ -25,7 +25,13 @@ export default function BlogPostPage() {
       if (error) throw error;
 
       // Increment views
-      await supabase.rpc('increment_blog_views', { post_id: data.id }).catch(() => {});
+      try {
+  await supabase.rpc("increment_blog_views", {
+    post_id: data.id,
+  });
+} catch {
+  // Ignore view count errors
+}
       
       return data;
     },
