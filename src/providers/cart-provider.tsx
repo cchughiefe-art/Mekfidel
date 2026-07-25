@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
+
 import type { Product } from '@/types';
 
 interface CartItem {
@@ -162,9 +163,11 @@ export function CartProvider({
     }
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
+  if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
-  }, [state.items]);
+  }
+}, [state.items]);
 
   const totalItems = state.items.reduce(
     (sum, item) => sum + item.quantity,
