@@ -18,7 +18,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import type { z } from 'zod';
 
-type ProductFormData = z.infer<typeof productSchema>;
+type ProductFormData = z.input<typeof productSchema>;
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -44,17 +44,22 @@ export default function NewProductPage() {
     },
   });
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      is_active: true,
-      is_featured: false,
-      availability: 'in_stock',
-      warranty: '1 Year Warranty',
-      features: [],
-      specifications: {},
-    },
-  });
+  const {
+  register,
+  handleSubmit,
+  setValue,
+  formState: { errors },
+} = useForm({
+  resolver: zodResolver(productSchema),
+  defaultValues: {
+    is_active: true,
+    is_featured: false,
+    availability: "in_stock",
+    warranty: "1 Year Warranty",
+    features: [],
+    specifications: {},
+  },
+});
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
