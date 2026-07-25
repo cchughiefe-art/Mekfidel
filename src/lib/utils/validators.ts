@@ -13,7 +13,7 @@ export const productSchema = z.object({
   warranty: z.string().default('No warranty'),
   availability: z.enum(['in_stock', 'out_of_stock', 'pre_order']),
   features: z.array(z.string()).default([]),
-  specifications: z.record(z.string()).default({}),
+  specifications: z.record(z.string(), z.string()).default({}),
   is_featured: z.boolean().default(false),
   is_active: z.boolean().default(true),
   seo_title: z.string().optional(),
