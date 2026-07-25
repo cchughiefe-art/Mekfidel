@@ -7,17 +7,19 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export function CartSidebar() {
   const { items, isOpen, closeCart, totalPrice, totalItems, updateQuantity, removeItem } = useCart();
   const [checkingOut, setCheckingOut] = useState(false);
-
+  const router = useRouter();
   const handleCheckout = () => {
-    if (items.length === 0) return;
-    closeCart();
-    window.location.href = '/cart';
-  };
+  if (items.length === 0) return;
+
+  closeCart();
+  router.push('/cart');
+};
 
   return (
     <>
