@@ -18,8 +18,14 @@ export default function AdminSettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const { data } = await supabase.from('settings').select('*').single();
-      return data;
+      const { data, error } = await supabase
+  .from('settings')
+  .select('*')
+  .single();
+
+if (error) throw error;
+
+return data;
     },
   });
 
@@ -74,7 +80,12 @@ export default function AdminSettingsPage() {
       const { error } = await supabase.from('settings').update({ ...formData, logo }).eq('id', settings?.id);
       if (error) throw error;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['settings'] }); toast.success('Settings saved'); },
+   onSuccess: async () => {
+  await queryClient.invalidateQueries({ queryKey: ['settings'] });
+await queryClient.refetchQueries({ queryKey: ['settings'] });
+setLogoFile(null);
+toast.success('Settings saved');
+},
     onError: (error: any) => toast.error(error.message),
   });
 
@@ -95,13 +106,32 @@ export default function AdminSettingsPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <Input label="Company Name" value={formData.company_name} onChange={e => setFormData({...formData, company_name: e.target.value})} />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Logo</label>
-              <label className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50">
-                <Upload className="w-5 h-5 text-gray-400" />
-                <span className="text-sm text-gray-500">{logoFile ? logoFile.name : (settings?.logo ? 'Replace logo' : 'Upload logo')}</span>
-                <input type="file" accept="image/*" className="hidden" onChange={e => setLogoFile(e.target.files?.[0] || null)} />
-              </label>
-            </div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Logo
+  </label>
+
+  {settings?.logo && (
+    <img
+      src={settings.logo}
+      alt="Company Logo"
+      className="h-20 w-auto mb-4 rounded-lg border"
+    />
+  )}
+
+  <label className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50">
+    <Upload className="w-5 h-5 text-gray-400" />
+    <span className="text-sm text-gray-500">
+      {logoFile ? logoFile.name : (settings?.logo ? 'Replace logo' : 'Upload logo')}
+    </span>
+
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+    />
+  </label>
+</div>
           </div>
           <div className="grid sm:grid-cols-2 gap-6">
             <Input label="Phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
@@ -142,4 +172,5 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+
 
