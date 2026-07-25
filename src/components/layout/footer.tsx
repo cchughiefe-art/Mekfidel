@@ -1,18 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { Smartphone, Mail, Phone, MapPin, Clock, Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
+import { Smartphone, Mail, Phone, MapPin, Clock, Globe, Globe, Globe, Globe, Globe } from 'lucide-react';
 import { useSettings } from '@/hooks/use-supabase-query';
 
 export function Footer() {
   const { data: settings } = useSettings();
 
   const socialLinks = [
-    { icon: Facebook, href: settings?.social_media?.facebook || '#', label: 'Facebook' },
-    { icon: Instagram, href: settings?.social_media?.instagram || '#', label: 'Instagram' },
-    { icon: Twitter, href: settings?.social_media?.twitter || '#', label: 'Twitter' },
-    { icon: Linkedin, href: settings?.social_media?.linkedin || '#', label: 'LinkedIn' },
-    { icon: Youtube, href: settings?.social_media?.youtube || '#', label: 'YouTube' },
+    { icon: Globe, href: settings?.social_media?.facebook || '#', label: 'Globe' },
+    { icon: Globe, href: settings?.social_media?.instagram || '#', label: 'Globe' },
+    { icon: Globe, href: settings?.social_media?.twitter || '#', label: 'Globe' },
+    { icon: Globe, href: settings?.social_media?.linkedin || '#', label: 'LinkedIn' },
+    { icon: Globe, href: settings?.social_media?.youtube || '#', label: 'YouTube' },
   ].filter(s => s.href && s.href !== '#');
 
   return (
