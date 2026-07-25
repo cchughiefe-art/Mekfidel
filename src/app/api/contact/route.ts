@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabase = await createAdminClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data: settings, error } = await supabase
       .from("settings")
@@ -58,10 +58,13 @@ ${message}`
       whatsappUrl,
     });
 
-  } catch (error: any) {
+ } catch (error: any) {
+    console.error("CONTACT API ERROR:", error);
+
     return NextResponse.json(
-      { error: error.message },
+      { 
+        error: error.message || "Unknown error",
+      },
       { status: 500 }
     );
-  }
 }
