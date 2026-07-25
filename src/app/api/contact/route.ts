@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabase = createAdminClient();
+    const supabase = await createAdminClient();
 
     const { data: settings, error } = await supabase
       .from("settings")
