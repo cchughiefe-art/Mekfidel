@@ -76,9 +76,17 @@ export function Header() {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Smartphone className="w-6 h-6 text-white" />
-              </div>
+              {settings?.logo ? (
+  <img
+    src={settings.logo}
+    alt={settings.company_name || "Mekfidel"}
+    className="w-10 h-10 rounded-xl object-contain"
+  />
+) : (
+  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+    <Smartphone className="w-6 h-6 text-white" />
+  </div>
+)}
               <div>
                 <span className="text-lg font-bold text-gray-900 block leading-tight">Mekfidel</span>
                 <span className="text-[10px] text-gray-500 block leading-tight tracking-wider uppercase">Communication</span>
