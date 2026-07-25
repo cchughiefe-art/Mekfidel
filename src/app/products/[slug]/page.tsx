@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
       if (error) throw error;
 
       // Increment view count
-      await supabase.rpc('increment_product_views', { product_id: data.id }).catch(() => {});
+      try { await supabase.rpc('increment_product_views', { product_id: data.id }); } catch {}
       
       return data as Product;
     },
