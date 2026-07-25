@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Smartphone, Mail, Phone, MapPin, Clock, Globe, Globe, Globe, Globe, Globe } from 'lucide-react';
+import { Smartphone, Mail, Phone, MapPin, Clock, Globe } from 'lucide-react';
 import { useSettings } from '@/hooks/use-supabase-query';
 
 export function Footer() {
