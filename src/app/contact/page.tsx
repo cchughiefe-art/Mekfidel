@@ -36,13 +36,22 @@ export default function ContactPage() {
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to send message');
-      toast.success('Message sent successfully! We will get back to you soon.');
-      reset();
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+});
+
+if (!res.ok) throw new Error('Failed to send message');
+
+const result = await res.json();
+
+if (result.whatsappUrl) {
+  window.location.href = result.whatsappUrl;
+  return;
+}
+
+toast.success('Message sent successfully! We will get back to you soon.');
+reset();
     } catch {
       toast.error('Failed to send message. Please try again or contact us via WhatsApp.');
     } finally {

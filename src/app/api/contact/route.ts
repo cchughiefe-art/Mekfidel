@@ -1,33 +1,67 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const { name, email, phone, subject, message } = body;
+    const body = await req.json();
 
-    // Validate
+    const {
+      name,
+      email,
+      phone,
+      subject,
+      message,
+    } = body;
+
     if (!name || !email || !message) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    // Log the contact submission
-    console.log('Contact form submission:', { name, email, phone, subject, message });
+    const supabase = createClient();
 
-    // Send notification via WhatsApp
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '2348000000000';
+    const { data: settings, error } = await supabase
+      .from("settings")
+      .select("whatsapp")
+      .single();
+
+    if (error) throw error;
+
+    if (!settings?.whatsapp) {
+      return NextResponse.json(
+        { error: "WhatsApp number not configured" },
+        { status: 400 }
+      );
+    }
+
     const whatsappMessage = encodeURIComponent(
-      `📬 NEW CONTACT FORM\n\nFrom: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nSubject: ${subject}\n\nMessage:\n${message}`
+      `Hello Mekfidel Communication
+
+New Contact Message
+
+Name: ${name}
+Email: ${email}
+Phone: ${phone || "N/A"}
+Subject: ${subject || "N/A"}
+
+Message:
+${message}`
     );
 
-    try {
-      await fetch(`https://api.callmebot.com/whatsapp.php?phone=${whatsappNumber}&text=${whatsappMessage}&apikey=12345`);
-    } catch {
-      // Best effort
-    }
+    const whatsappUrl =
+      `https://wa.me/${settings.whatsapp}?text=${whatsappMessage}`;
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      whatsappUrl,
+    });
+
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }
-
