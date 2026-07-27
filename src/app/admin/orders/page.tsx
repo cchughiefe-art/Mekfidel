@@ -29,8 +29,20 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
-  const { data: orders, isLoading } = useQuery({
+  // Check authentication
+  const { data: session, isLoading: sessionLoading, error: sessionError } = useQuery({
+    queryKey: ['admin-session'],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (!session) throw new Error('Not authenticated');
+      return session;
+    },
+  });
+
+  const { data: orders, isLoading, error } = useQuery({
     queryKey: ['admin-orders', search, statusFilter],
+    enabled: !!session,
     queryFn: async () => {
       let query = supabase
         .from('orders')
@@ -53,38 +65,58 @@ export default function AdminOrdersPage() {
     },
   });
 
+  // Use server API route for updating status
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: OrderStatus }) => {
-      const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-      if (error) throw error;
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update status');
+      }
+
+      return response.json();
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
-      toast.success('Status updated');
+      toast.success('Status updated successfully');
       setSelectedOrder((prev: any) =>
         prev ? { ...prev, status: variables.status } : prev
       );
     },
-    onError: (error: any) => toast.error(error.message),
+    onError: (error: any) => {
+      console.error('Status update error:', error);
+      toast.error(error.message || 'Failed to update status');
+    },
   });
 
+  // Use server API route for deleting
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .delete()
-        .eq('order_id', id);
-      if (itemsError) throw itemsError;
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'DELETE',
+      });
 
-      const { error } = await supabase.from('orders').delete().eq('id', id);
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete order');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
-      toast.success('Order deleted');
+      toast.success('Order deleted successfully');
       setSelectedOrder(null);
     },
-    onError: (error: any) => toast.error(error.message),
+    onError: (error: any) => {
+      console.error('Delete error:', error);
+      toast.error(error.message || 'Failed to delete order');
+    },
   });
 
   const handleDelete = (id: string) => {
@@ -92,6 +124,26 @@ export default function AdminOrdersPage() {
       deleteMutation.mutate(id);
     }
   };
+
+  // Show authentication error
+  if (!sessionLoading && sessionError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">You must be logged in to access this page.</p>
+        <a href="/auth/login" className="text-blue-600 hover:text-blue-700">
+          Go to Login
+        </a>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">Error loading orders: {(error as any).message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -143,6 +195,12 @@ export default function AdminOrdersPage() {
               <tr>
                 <td colSpan={7} className="py-20">
                   <Spinner />
+                </td>
+              </tr>
+            ) : orders?.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-20 text-center text-gray-500">
+                  No orders found
                 </td>
               </tr>
             ) : (
@@ -259,10 +317,11 @@ export default function AdminOrdersPage() {
                     onClick={() =>
                       statusMutation.mutate({ id: selectedOrder.id, status })
                     }
+                    disabled={statusMutation.isPending}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       selectedOrder.status === status
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50'
                     }`}
                   >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -274,9 +333,10 @@ export default function AdminOrdersPage() {
             <div className="border-t pt-4">
               <button
                 onClick={() => handleDelete(selectedOrder.id)}
-                className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-all"
+                disabled={deleteMutation.isPending}
+                className="w-full px-4 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-50"
               >
-                Delete Order
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Order'}
               </button>
             </div>
           </div>
@@ -285,4 +345,3 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
-
