@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createServerSupabaseClient();
     
     // Verify user is authenticated
@@ -31,7 +32,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('orders')
       .update({ status })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -49,9 +50,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createServerSupabaseClient();
     
     // Verify user is authenticated
@@ -75,7 +77,7 @@ export async function DELETE(
     const { error: itemsError } = await supabase
       .from('order_items')
       .delete()
-      .eq('order_id', params.id);
+      .eq('order_id', id);
 
     if (itemsError) throw itemsError;
 
@@ -83,7 +85,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('orders')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw error;
 
