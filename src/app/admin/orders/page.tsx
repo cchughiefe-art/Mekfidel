@@ -245,12 +245,20 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(order.id)}>
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4 text-blue-600" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Order"
+                        >
                           <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -311,13 +319,13 @@ export default function AdminOrdersPage() {
               <div className="flex gap-2 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => setSelectedOrder(order)}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex-1 px-3 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors active:bg-blue-800"
                 >
                   View Details
                 </button>
                 <button
                   onClick={() => handleDelete(order.id)}
-                  className="px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  className="px-3 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors active:bg-red-800"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -363,35 +371,35 @@ export default function AdminOrdersPage() {
         size="lg"
       >
         {selectedOrder && (
-          <div className="space-y-6 max-h-[80vh] overflow-y-auto px-2">
+          <div className="space-y-6">
             {/* Customer Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Customer</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Customer</p>
                 <p className="font-medium text-gray-900">{selectedOrder.customer_name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Phone</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Phone</p>
                 <p className="font-medium text-gray-900">{selectedOrder.customer_phone}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Email</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Email</p>
                 <p className="font-medium text-gray-900 break-all text-sm">{selectedOrder.customer_email}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Date</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Date</p>
                 <p className="font-medium text-gray-900 text-sm">{formatDateTime(selectedOrder.created_at)}</p>
               </div>
               <div className="sm:col-span-2">
-                <p className="text-sm text-gray-500 mb-1">Address</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Address</p>
                 <p className="font-medium text-gray-900">{selectedOrder.customer_address}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">State</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">State</p>
                 <p className="font-medium text-gray-900">{selectedOrder.state}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">City</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">City</p>
                 <p className="font-medium text-gray-900">{selectedOrder.city}</p>
               </div>
             </div>
@@ -423,14 +431,14 @@ export default function AdminOrdersPage() {
             {/* Notes */}
             {selectedOrder.notes && (
               <div className="border-t pt-4">
-                <p className="text-sm text-gray-500 mb-2">Notes</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Notes</p>
                 <p className="text-gray-700 text-sm">{selectedOrder.notes}</p>
               </div>
             )}
 
             {/* Status Update */}
             <div className="border-t pt-4">
-              <p className="font-semibold mb-3 text-gray-900">Update Status</p>
+              <p className="font-semibold mb-4 text-gray-900">Update Status</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {statuses.map((status) => (
                   <button
@@ -442,7 +450,7 @@ export default function AdminOrdersPage() {
                     className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       selectedOrder.status === status
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50'
                     }`}
                   >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -452,11 +460,17 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Delete Button */}
-            <div className="border-t pt-4">
+            <div className="border-t pt-4 flex gap-2">
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
               <button
                 onClick={() => handleDelete(selectedOrder.id)}
                 disabled={deleteMutation.isPending}
-                className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-50"
+                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {deleteMutation.isPending ? 'Deleting...' : 'Delete Order'}
               </button>
