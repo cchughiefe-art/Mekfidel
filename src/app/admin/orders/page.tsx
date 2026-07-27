@@ -8,7 +8,7 @@ import { Modal } from '@/components/ui/modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { OrderStatus } from '@/types';
 
@@ -40,7 +40,29 @@ export default function AdminOrdersPage() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-orders'] }); toast.success('Status updated'); },
     onError: (error: any) => toast.error(error.message),
   });
+const deleteMutation = useMutation({
+  mutationFn: async (id: string) => {
+    await supabase.from('order_items').delete().eq('order_id', id);
 
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['admin-orders'],
+    });
+
+    toast.success('Order deleted');
+    setSelectedOrder(null);
+  },
+
+  onError: (error: any) => toast.error(error.message),
+});>
   return (
     <div className="space-y-6">
       <div><h1 className="text-2xl font-bold text-gray-900">Orders</h1><p className="text-gray-500 mt-1">Manage customer orders</p></div>
@@ -80,7 +102,27 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{formatDateTime(order.created_at)}</td>
                   <td className="px-6 py-4 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}><Eye className="w-4 h-4" /></Button>
+                   <div className="flex justify-end gap-2">
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => setSelectedOrder(order)}
+  >
+    <Eye className="w-4 h-4" />
+  </Button>
+
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => {
+      if (confirm('Delete this order?')) {
+        deleteMutation.mutate(order.id);
+      }
+    }}
+  >
+    <Trash2 className="w-4 h-4 text-red-600" />
+  </Button>
+</div>
                   </td>
                 </tr>
               ))}
@@ -129,7 +171,19 @@ export default function AdminOrdersPage() {
                 {statuses.map(status => (
                   <button
                     key={status}
-                    onClick={() => statusMutation.mutate({ id: selectedOrder.id, status })}
+                    onClick={() => {
+  statusMutation.mutate(
+    { id: selectedOrder.id, status },
+    {
+      onSuccess: () => {
+        setSelectedOrder({
+          ...selectedOrder,
+          status,
+        });
+      },
+    }
+  );
+}}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       selectedOrder.status === status 
                         ? 'bg-blue-600 text-white' 
