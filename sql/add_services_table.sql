@@ -1,4 +1,8 @@
--- Add services table to your Supabase database
+-- ============================================================
+-- SERVICES TABLE
+-- Production-ready services table for Mekfidel Communication Ltd
+-- ============================================================
+
 CREATE TABLE IF NOT EXISTS services (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -12,29 +16,23 @@ CREATE TABLE IF NOT EXISTS services (
   is_active BOOLEAN DEFAULT TRUE
 );
 
--- Create index for faster queries
+-- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_services_order ON services(order_index);
 CREATE INDEX IF NOT EXISTS idx_services_active ON services(is_active);
 
--- Set up RLS policies (Row Level Security)
+-- Set up RLS policies
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
--- Allow anyone to read published services
-CREATE POLICY "Anyone can view active services"
-  ON services FOR SELECT
-  USING (is_active = true);
+-- Public read access (anyone can view active services)
+CREATE POLICY "Public read access" ON services FOR SELECT USING (is_active = true);
 
--- Allow only admins to insert services
-CREATE POLICY "Only admins can insert services"
-  ON services FOR INSERT
-  WITH CHECK (auth.jwt() ->> 'role' = 'admin');
+-- Admin full access
+CREATE POLICY "Admin full access" ON services FOR ALL USING (
+  auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor'))
+);
 
--- Allow only admins to update services
-CREATE POLICY "Only admins can update services"
-  ON services FOR UPDATE
-  USING (auth.jwt() ->> 'role' = 'admin');
+-- Auto-update trigger for updated_at
+CREATE TRIGGER update_services_updated_at
+  BEFORE UPDATE ON services
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- Allow only admins to delete services
-CREATE POLICY "Only admins can delete services"
-  ON services FOR DELETE
-  USING (auth.jwt() ->> 'role' = 'admin');

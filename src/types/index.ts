@@ -195,6 +195,19 @@ export interface Testimonial {
   is_published: boolean;
 }
 
+export interface Service {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  features: string[];
+  order_index: number;
+  is_active: boolean;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -203,4 +216,5 @@ export interface UserProfile {
   role: 'admin' | 'editor' | 'viewer';
   created_at: string;
 }
+
 

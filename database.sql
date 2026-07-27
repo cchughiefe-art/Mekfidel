@@ -119,6 +119,23 @@ CREATE TABLE IF NOT EXISTS screen_compatibility (
 );
 
 -- ============================================================
+-- SERVICES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS services (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  icon TEXT NOT NULL,
+  color TEXT DEFAULT 'bg-blue-50 text-blue-600',
+  features TEXT[] DEFAULT ARRAY[]::TEXT[],
+  order_index INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- ============================================================
 -- BLOG
 -- ============================================================
 
@@ -243,6 +260,8 @@ CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(is_published);
 CREATE INDEX IF NOT EXISTS idx_screen_compatibility_brand ON screen_compatibility(brand);
 CREATE INDEX IF NOT EXISTS idx_screen_compatibility_model ON screen_compatibility(model);
+CREATE INDEX IF NOT EXISTS idx_services_order ON services(order_index);
+CREATE INDEX IF NOT EXISTS idx_services_active ON services(is_active);
 
 -- ============================================================
 -- AUTO-UPDATE TRIGGERS
@@ -262,6 +281,10 @@ CREATE TRIGGER update_products_updated_at
 
 CREATE TRIGGER update_blog_posts_updated_at
   BEFORE UPDATE ON blog_posts
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER update_services_updated_at
+  BEFORE UPDATE ON services
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER update_settings_updated_at
@@ -302,6 +325,7 @@ ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media ENABLE ROW LEVEL SECURITY;
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
 -- Public read access
 CREATE POLICY "Public read access" ON categories FOR SELECT USING (true);
@@ -312,6 +336,7 @@ CREATE POLICY "Public read access" ON blog_posts FOR SELECT USING (is_published 
 CREATE POLICY "Public read access" ON faqs FOR SELECT USING (is_published = true);
 CREATE POLICY "Public read access" ON testimonials FOR SELECT USING (is_published = true);
 CREATE POLICY "Public read access" ON settings FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON services FOR SELECT USING (is_active = true);
 
 -- Admin full access
 CREATE POLICY "Admin full access" ON categories FOR ALL USING (
@@ -347,6 +372,9 @@ CREATE POLICY "Admin full access" ON testimonials FOR ALL USING (
 CREATE POLICY "Admin full access" ON settings FOR ALL USING (
   auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor'))
 );
+CREATE POLICY "Admin full access" ON services FOR ALL USING (
+  auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor'))
+);
 CREATE POLICY "Admin full access" ON media FOR ALL USING (
   auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor'))
 );
@@ -371,4 +399,6 @@ ON CONFLICT DO NOTHING;
 --   ('icons', 'icons', true),
 --   ('uploads', 'uploads', true)
 -- ON CONFLICT DO NOTHING;
+
+
 

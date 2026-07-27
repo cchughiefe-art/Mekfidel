@@ -20,6 +20,7 @@ import {
   Tags,
   Bookmark,
   ChevronLeft,
+  Toolbox,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -32,6 +33,7 @@ const sidebarLinks = [
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Services', href: '/admin/services', icon: Toolbox },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Media', href: '/admin/media', icon: Image },
   { name: 'SEO', href: '/admin/seo', icon: Search },
@@ -106,4 +108,6 @@ export function AdminSidebar() {
     </aside>
   );
 }
+
+
 
