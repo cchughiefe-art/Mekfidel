@@ -2,10 +2,27 @@
 
 import Link from 'next/link';
 import { ArrowRight, MessageCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { createClient } from '@/lib/supabase/client';
 import { useSettings } from '@/hooks/use-supabase-query';
 
 export function CTASection() {
+  const supabase = createClient();
   const { data: settings } = useSettings();
+
+  const { data: section } = useQuery({
+    queryKey: ['cms-section-cta'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('homepage_sections')
+        .select('*')
+        .eq('section_key', 'cta')
+        .eq('is_active', true)
+        .single();
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <section className="gradient-hero relative overflow-hidden">
@@ -16,18 +33,18 @@ export function CTASection() {
 
       <div className="container-custom relative z-10 py-20 text-center">
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-          Ready to Get Started?
+          {section?.title || 'Ready to Get Started?'}
         </h2>
         <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-10">
-          Browse our catalog, request a quote, or visit our store. We are here to help you with all your mobile needs.
+          {section?.description || 'Browse our catalog, request a quote, or visit our store. We are here to help you with all your mobile needs.'}
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-            href="/products"
+            href={section?.button_url || '/products'}
             className="bg-white text-blue-700 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-xl inline-flex items-center gap-2"
           >
             <ArrowRight className="w-5 h-5" />
-            Shop Now
+            {section?.button_text || 'Shop Now'}
           </Link>
           <a
             href={`https://wa.me/${settings?.whatsapp || '2348000000000'}`}

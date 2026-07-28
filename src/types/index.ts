@@ -217,4 +217,189 @@ export interface UserProfile {
   created_at: string;
 }
 
+// ============================================================
+// CMS Types
+// ============================================================
+
+export interface HomepageSection {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  section_key: string;
+  section_type: 'hero' | 'features_grid' | 'stats' | 'cta' | 'testimonials' | 'steps' | 'promo' | 'custom';
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  button_text?: string;
+  button_url?: string;
+  image?: string;
+  background_image?: string;
+  icon?: string;
+  color?: string;
+  background_color?: string;
+  sort_order: number;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
+  feature_cards?: FeatureCard[];
+}
+
+export interface FeatureCard {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  section_id: string;
+  title: string;
+  description?: string;
+  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name: string;
+  icon_color?: string;
+  url?: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface Statistic {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  context: 'homepage' | 'about' | 'footer' | string;
+  label: string;
+  value: string;
+  suffix?: string;
+  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name?: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export type NavigationLocation = 'header' | 'footer_main' | 'footer_quick' | 'footer_categories' | 'mobile';
+
+export interface NavigationItem {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  location: NavigationLocation;
+  label: string;
+  url: string;
+  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name?: string;
+  parent_id?: string;
+  sort_order: number;
+  is_active: boolean;
+  is_new_tab: boolean;
+  children?: NavigationItem[];
+}
+
+export interface FooterSection {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  section_key: string;
+  title?: string;
+  content?: string;
+  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name?: string;
+  links: FooterLink[];
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface FooterLink {
+  label: string;
+  url: string;
+  is_new_tab?: boolean;
+}
+
+export interface SocialLink {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  platform: string;
+  label: string;
+  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name?: string;
+  url?: string;
+  is_visible: boolean;
+  sort_order: number;
+}
+
+export interface UploadedIcon {
+  id: string;
+  created_at: string;
+  name: string;
+  slug: string;
+  svg_content: string;
+  tags: string[];
+  usage_count: number;
+  width?: number;
+  height?: number;
+}
+
+export interface ContentBlock {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  block_key: string;
+  block_type: 'text' | 'html' | 'markdown' | 'component';
+  title?: string;
+  content: string;
+  page?: string;
+  position?: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CompanyInfo {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  info_key: string;
+  info_type: 'text' | 'html' | 'number' | 'date';
+  title?: string;
+  content: string;
+  image?: string;
+  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name?: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface AboutValue {
+  id: string;
+  title: string;
+  description: string;
+  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_name: string;
+  icon_color?: string;
+}
+
+// Extended Testimonial with sorting
+export interface Testimonial {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  role?: string;
+  company?: string;
+  content: string;
+  rating: number;
+  image?: string;
+  avatar?: string;
+  is_published: boolean;
+  is_featured: boolean;
+  sort_order: number;
+}
+
+// Extended FAQ with sorting
+export interface FAQ {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  question: string;
+  answer: string;
+  category?: string;
+  is_published: boolean;
+  sort_order: number;
+}
+
 
