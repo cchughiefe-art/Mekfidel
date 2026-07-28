@@ -21,6 +21,13 @@ import {
   Bookmark,
   ChevronLeft,
   Toolbox,
+  Home,
+  Menu,
+  Share2,
+  ImageIcon,
+  Star,
+  HelpCircle,
+  Briefcase,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -39,6 +46,15 @@ const sidebarLinks = [
   { name: 'SEO', href: '/admin/seo', icon: Search },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
   { name: 'Users', href: '/admin/users', icon: UserCog },
+];
+
+const cmsLinks = [
+  { name: 'Homepage', href: '/admin/homepage', icon: Home },
+  { name: 'Navigation', href: '/admin/navigation', icon: Menu },
+  { name: 'Footer', href: '/admin/footer', icon: Share2 },
+  { name: 'Icons', href: '/admin/icons', icon: ImageIcon },
+  { name: 'Testimonials', href: '/admin/testimonials', icon: Star },
+  { name: 'FAQs', href: '/admin/faqs', icon: HelpCircle },
 ];
 
 export function AdminSidebar() {
@@ -68,6 +84,32 @@ export function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {sidebarLinks.map(link => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href || pathname?.startsWith(link.href + '/');
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              )}
+            >
+              <Icon className="w-5 h-5" />
+              {link.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* CMS Section */}
+      <div className="px-4 pt-4 pb-2">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">CMS</p>
+      </div>
+      <nav className="px-4 pb-4 space-y-1">
+        {cmsLinks.map(link => {
           const Icon = link.icon;
           const isActive = pathname === link.href || pathname?.startsWith(link.href + '/');
           return (

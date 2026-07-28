@@ -4,31 +4,22 @@ import { useQuery } from '@tanstack/react-query';
 import { Star, Quote } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Spinner } from '@/components/ui/spinner';
-
-interface TestimonialData {
-  id: string;
-  name: string;
-  role?: string;
-  company?: string;
-  content: string;
-  rating: number;
-  image?: string;
-}
+import type { Testimonial } from '@/types';
 
 export function Testimonials() {
   const supabase = createClient();
 
   const { data: testimonials, isLoading } = useQuery({
-    queryKey: ['testimonials'],
+    queryKey: ['public-testimonials'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('testimonials')
         .select('*')
         .eq('is_published', true)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as TestimonialData[];
+        .order('sort_order', { ascending: true });
+      return (data || []) as Testimonial[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   // Show default testimonials if none in database
@@ -39,6 +30,9 @@ export function Testimonials() {
       role: 'Business Owner',
       content: 'Mekfidel Communication has been my go-to store for phone accessories. Their products are genuine and the prices are unbeatable. Highly recommended!',
       rating: 5,
+      sort_order: 1,
+      is_published: true,
+      is_featured: false,
     },
     {
       id: '2',
@@ -46,6 +40,9 @@ export function Testimonials() {
       role: 'Tech Enthusiast',
       content: 'I had my phone screen replaced here and the service was exceptional. Quick turnaround and quality work. My phone looks brand new!',
       rating: 5,
+      sort_order: 2,
+      is_published: true,
+      is_featured: false,
     },
     {
       id: '3',
@@ -53,8 +50,11 @@ export function Testimonials() {
       role: 'Retailer',
       content: 'As a retailer, I source all my phone inventory from Mekfidel. Their wholesale prices are competitive and delivery is always on time.',
       rating: 5,
+      sort_order: 3,
+      is_published: true,
+      is_featured: false,
     },
-  ] as TestimonialData[];
+  ] as Testimonial[];
 
   return (
     <section className="section-padding">
