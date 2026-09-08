@@ -2,7 +2,7 @@
 
 A comprehensive, production-ready e-commerce and Content Management System (CMS) website for **Mekfidel Communication Ltd** — a Nigeria-based mobile phones, accessories, spare parts, and professional phone repair service provider.
 
-Built with **Next.js 15**, **TypeScript**, **Tailwind CSS**, **Supabase**, and featuring a fully dynamic CMS.
+Built with **Next.js 16**, **TypeScript**, **Tailwind CSS 3**, **Supabase**, and featuring a fully dynamic CMS.
 
 ---
 
@@ -45,9 +45,9 @@ Mekfidel Communication Ltd is a full-featured e-commerce platform that enables t
 
 | Layer              | Technology                                              | Purpose                              |
 | ----------------- | ------------------------------------------------------- | ------------------------------------ |
-| **Framework**      | Next.js 15 (App Router)                                 | React framework with server components |
+| **Framework**      | Next.js 16 (App Router)                                 | React framework with server components |
 | **Language**       | TypeScript                                              | Type-safe development                |
-| **Styling**        | Tailwind CSS v4                                         | Utility-first CSS framework          |
+| **Styling**        | Tailwind CSS v3                                         | Utility-first CSS framework          |
 | **Database**       | Supabase (PostgreSQL)                                    | Primary database with RLS            |
 | **Authentication**  | Supabase Auth                                           | User authentication and management   |
 | **Storage**        | Supabase Storage                                        | Media file storage (images, SVGs)   |
@@ -598,4 +598,3 @@ This is a private project for Mekfidel Communication Ltd. All rights reserved.
 ## License
 
 Private — All rights reserved. Mekfidel Communication Ltd.
-

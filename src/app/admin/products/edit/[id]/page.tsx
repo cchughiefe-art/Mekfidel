@@ -53,6 +53,8 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (product) {
+      // The form intentionally takes a snapshot when the async record arrives.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(product);
       setExistingImages(product.images || []);
       setFeatures(product.features?.length ? product.features : ['']);
@@ -65,7 +67,7 @@ export default function EditProductPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      let images = [...existingImages];
+      const images = [...existingImages];
       
       for (const file of newImages) {
         const result = await uploadFile('products', file);
@@ -188,4 +190,3 @@ export default function EditProductPage() {
     </div>
   );
 }
-

@@ -8,6 +8,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('social_links')
       .select('*')
+      .eq('is_visible', true)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;

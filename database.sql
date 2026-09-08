@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS customers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   name TEXT NOT NULL,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   phone TEXT NOT NULL,
   address TEXT,
   state TEXT,
@@ -165,10 +165,11 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 CREATE TABLE IF NOT EXISTS faqs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   question TEXT NOT NULL,
   answer TEXT NOT NULL,
   category TEXT,
-  "order" INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0,
   is_published BOOLEAN DEFAULT TRUE
 );
 
@@ -179,13 +180,17 @@ CREATE TABLE IF NOT EXISTS faqs (
 CREATE TABLE IF NOT EXISTS testimonials (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   name TEXT NOT NULL,
   role TEXT,
   company TEXT,
   content TEXT NOT NULL,
   rating INTEGER DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
   image TEXT,
-  is_published BOOLEAN DEFAULT TRUE
+  avatar TEXT,
+  is_published BOOLEAN DEFAULT TRUE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  sort_order INTEGER DEFAULT 0
 );
 
 -- ============================================================
@@ -337,6 +342,7 @@ CREATE POLICY "Public read access" ON faqs FOR SELECT USING (is_published = true
 CREATE POLICY "Public read access" ON testimonials FOR SELECT USING (is_published = true);
 CREATE POLICY "Public read access" ON settings FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON services FOR SELECT USING (is_active = true);
+CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
 -- Admin full access
 CREATE POLICY "Admin full access" ON categories FOR ALL USING (
@@ -399,6 +405,5 @@ ON CONFLICT DO NOTHING;
 --   ('icons', 'icons', true),
 --   ('uploads', 'uploads', true)
 -- ON CONFLICT DO NOTHING;
-
 
 

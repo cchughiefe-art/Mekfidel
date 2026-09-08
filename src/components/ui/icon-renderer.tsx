@@ -1,5 +1,6 @@
 'use client';
 
+import { createElement } from 'react';
 import { getIcon, type LucideIcon } from '@/lib/utils/icon-mapper';
 import { Smartphone } from 'lucide-react';
 
@@ -35,7 +36,7 @@ export function IconRenderer({
   const IconComponent = getIcon(iconName, library);
   
   if (IconComponent) {
-    return <IconComponent className={className} size={size} />;
+    return createElement(IconComponent, { className, size });
   }
 
   // Handle Heroicons
@@ -73,7 +74,7 @@ interface SimpleIconProps {
 export function SimpleIcon({ name, className = '', size = 24 }: SimpleIconProps) {
   const Icon = getIcon(name, 'lucide');
   if (Icon) {
-    return <Icon className={className} size={size} />;
+    return createElement(Icon, { className, size });
   }
   return <Smartphone className={className} size={size} />;
 }

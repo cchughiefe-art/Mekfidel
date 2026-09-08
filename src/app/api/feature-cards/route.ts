@@ -11,6 +11,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from('feature_cards')
       .select('*')
+      .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
     if (sectionId) {

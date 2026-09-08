@@ -50,6 +50,8 @@ return data;
 
   useEffect(() => {
     if (settings) {
+      // The editable form intentionally takes a snapshot of the fetched settings.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         company_name: settings.company_name || '',
         phone: settings.phone || '',
@@ -172,5 +174,4 @@ toast.success('Settings saved');
     </div>
   );
 }
-
 

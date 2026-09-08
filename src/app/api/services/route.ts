@@ -7,6 +7,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('services')
       .select('*')
+      .eq('is_active', true)
       .order('order_index', { ascending: true });
 
     if (error) throw error;
@@ -41,4 +42,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

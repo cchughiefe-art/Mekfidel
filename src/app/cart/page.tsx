@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { PlaceholderImage } from '@/components/ui/placeholder-image';
-import { ShoppingBag, Trash2, Minus, Plus, ArrowLeft, Send, Check } from 'lucide-react';
+import { ShoppingBag, Trash2, Minus, Plus, ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import type { z } from 'zod';
@@ -52,11 +52,8 @@ export default function CartPage() {
         ...data,
         items: items.map(item => ({
           product_id: item.product.id,
-          product_name: item.product.name,
           quantity: item.quantity,
-          price: item.product.price,
         })),
-        total: totalPrice,
       };
 
       const res = await fetch('/api/orders', {
@@ -65,13 +62,16 @@ export default function CartPage() {
         body: JSON.stringify(orderData),
       });
 
-      if (!res.ok) throw new Error('Failed to submit order');
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || 'Failed to submit order');
+      }
 
       clearCart();
       toast.success('Order submitted successfully! We will contact you shortly.');
       router.push('/');
-    } catch {
-      toast.error('Failed to submit order. Please try again or contact us directly.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit order. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -245,4 +245,3 @@ export default function CartPage() {
     </div>
   );
 }
-

@@ -185,7 +185,7 @@ ${data.message}`;
                 </h2>
 
                 <p className="text-gray-500 mb-8">
-                  Fill out the form below and we'll open WhatsApp with
+                  Fill out the form below and we&apos;ll open WhatsApp with
                   your message ready to send.
                 </p>
 

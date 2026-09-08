@@ -62,12 +62,17 @@ export default function FAQPage() {
         .from('faqs')
         .select('*')
         .eq('is_published', true)
-        .order('order');
+        .order('sort_order');
       return data;
     },
   });
 
-  const faqs = dbFaqs?.length ? dbFaqs.map((f: any) => ({ question: f.question, answer: f.answer })) : defaultFaqs;
+  const faqs = dbFaqs?.length
+    ? dbFaqs.map((faq: { question: string; answer: string }) => ({
+        question: faq.question,
+        answer: faq.answer,
+      }))
+    : defaultFaqs;
 
   const filteredFaqs = faqs.filter(
     faq =>
@@ -155,4 +160,3 @@ export default function FAQPage() {
     </div>
   );
 }
-

@@ -8,6 +8,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('homepage_sections')
       .select('*, feature_cards(*)')
+      .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;

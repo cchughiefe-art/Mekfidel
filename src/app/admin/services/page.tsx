@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { createElement, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -385,7 +385,7 @@ export default function AdminServicesPage() {
               <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}>
                 {(() => {
                   const Icon = getServiceIcon(icon);
-                  return <Icon className="w-5 h-5" />;
+                  return createElement(Icon, { className: 'w-5 h-5' });
                 })()}
               </div>
               <div>
@@ -444,4 +444,3 @@ export default function AdminServicesPage() {
     </div>
   );
 }
-

@@ -44,6 +44,15 @@ export const orderSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const orderItemSchema = z.object({
+  product_id: z.string().uuid('Invalid product'),
+  quantity: z.coerce.number().int().min(1).max(100),
+});
+
+export const createOrderSchema = orderSchema.extend({
+  items: z.array(orderItemSchema).min(1, 'Your cart is empty').max(50),
+});
+
 export const blogPostSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   content: z.string().min(50, 'Content must be at least 50 characters'),
@@ -103,4 +112,3 @@ export const compatibilitySchema = z.object({
   compatible_with: z.array(z.string()).default([]),
   notes: z.string().optional(),
 });
-

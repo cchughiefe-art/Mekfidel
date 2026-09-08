@@ -8,6 +8,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('footer_sections')
       .select('*')
+      .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;

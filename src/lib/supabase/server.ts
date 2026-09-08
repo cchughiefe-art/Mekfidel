@@ -29,16 +29,16 @@ export async function createServerSupabaseClient() {
 
 export async function createAdminClient() {
   const supabase = await createServerSupabaseClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (userError || !user) {
     throw new Error('Unauthorized');
   }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single();
 
   if (!profile || !['admin', 'editor'].includes(profile.role)) {
@@ -47,4 +47,3 @@ export async function createAdminClient() {
 
   return supabase;
 }
-

@@ -14,6 +14,7 @@ export async function GET(request: Request, { params }: Params) {
       .from('homepage_sections')
       .select('*, feature_cards(*)')
       .eq('id', id)
+      .eq('is_active', true)
       .single();
 
     if (error) throw error;

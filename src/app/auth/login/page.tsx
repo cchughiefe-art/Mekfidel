@@ -35,9 +35,11 @@ export default function LoginPage() {
       if (error) throw error;
 
       toast.success('Welcome back!');
-      router.push('/admin/dashboard');
-    } catch (error: any) {
-      toast.error(error.message || 'Invalid credentials');
+      const destination = new URLSearchParams(window.location.search).get('next');
+      router.push(destination?.startsWith('/admin') ? destination : '/admin/dashboard');
+      router.refresh();
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -100,4 +102,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

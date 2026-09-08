@@ -1,6 +1,14 @@
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
+import { createAdminClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  try {
+    await createAdminClient();
+  } catch {
+    redirect('/auth/login');
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -10,4 +18,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-

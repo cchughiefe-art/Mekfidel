@@ -14,6 +14,7 @@ export async function GET(request: Request, { params }: Params) {
       .from('feature_cards')
       .select('*')
       .eq('id', id)
+      .eq('is_active', true)
       .single();
 
     if (error) throw error;

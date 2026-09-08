@@ -54,10 +54,11 @@ NEXT_PUBLIC_GA_ID=your_google_analytics_id
 #### Option B: Run Migration (Existing Database)
 
 1. Navigate to **SQL Editor**
-2. Copy the contents of `sql/cms_migration.sql`
-3. Click **Run**
+2. Run `sql/cms_migration.sql` if the CMS tables have not been created yet
+3. Run `sql/production_hardening.sql` to align older FAQ, testimonial, and profile schemas
+4. Click **Run** after pasting each file
 
-This will create all new CMS tables without affecting existing data.
+The production hardening migration is idempotent and preserves existing data.
 
 ### 5. Storage Buckets
 

@@ -1,10 +1,55 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { createOrderSchema } from '@/lib/utils/validators';
+
+type ProductRow = {
+  id: string;
+  name: string;
+  price: number | string;
+  stock: number;
+  availability: 'in_stock' | 'out_of_stock' | 'pre_order';
+  is_active: boolean;
+};
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const parsed = createOrderSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid order' },
+        { status: 400 }
+      );
+    }
+
+    const body = parsed.data;
     const supabase = createServiceClient();
+
+    const productIds = [...new Set(body.items.map(item => item.product_id))];
+    const { data: productData, error: productsError } = await supabase
+      .from('products')
+      .select('id, name, price, stock, availability, is_active')
+      .in('id', productIds);
+
+    if (productsError) throw productsError;
+    const products = (productData || []) as ProductRow[];
+    const productById = new Map(products.map(product => [product.id, product]));
+
+    const items = body.items.map(item => {
+      const product = productById.get(item.product_id);
+      if (!product || !product.is_active) {
+        throw new Error('One or more products are no longer available');
+      }
+      if (product.availability === 'out_of_stock' || product.stock < item.quantity) {
+        throw new Error(`${product.name} does not have enough stock`);
+      }
+      return {
+        product_id: product.id,
+        product_name: product.name,
+        quantity: item.quantity,
+        price: Number(product.price),
+      };
+    });
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const { data: order, error } = await supabase
       .from('orders')
@@ -16,7 +61,7 @@ export async function POST(request: Request) {
         state: body.state,
         city: body.city,
         notes: body.notes || '',
-        total: body.total,
+        total,
         status: 'pending',
       })
       .select()
@@ -25,19 +70,14 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     // Insert order items
-    if (body.items?.length) {
+    if (items.length) {
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(
-          body.items.map((item: any) => ({
-            order_id: order.id,
-            product_id: item.product_id,
-            product_name: item.product_name,
-            quantity: item.quantity,
-            price: item.price,
-          }))
-        );
-      if (itemsError) throw itemsError;
+        .insert(items.map(item => ({ order_id: order.id, ...item })));
+      if (itemsError) {
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw itemsError;
+      }
     }
 
     // Update or create customer
@@ -52,7 +92,7 @@ export async function POST(request: Request) {
         .from('customers')
         .update({
           total_orders: (existingCustomer.total_orders || 0) + 1,
-          total_spent: (existingCustomer.total_spent || 0) + body.total,
+          total_spent: Number(existingCustomer.total_spent || 0) + total,
           phone: body.customer_phone,
           address: body.customer_address,
           state: body.state,
@@ -68,7 +108,7 @@ export async function POST(request: Request) {
         state: body.state,
         city: body.city,
         total_orders: 1,
-        total_spent: body.total,
+        total_spent: total,
       });
     }
 
@@ -76,8 +116,8 @@ export async function POST(request: Request) {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '2348000000000';
     const message = encodeURIComponent(
       `🆕 NEW ORDER!\n\n👤 ${body.customer_name}\n📞 ${body.customer_phone}\n📍 ${body.customer_address}, ${body.city}, ${body.state}\n\nItems:\n${
-        body.items?.map((i: any) => `  • ${i.product_name} × ${i.quantity} = ₦${(i.price * i.quantity).toLocaleString()}`).join('\n') || ''
-      }\n\n💰 Total: ₦${body.total.toLocaleString()}`
+        items.map(i => `  • ${i.product_name} × ${i.quantity} = ₦${(i.price * i.quantity).toLocaleString()}`).join('\n')
+      }\n\n💰 Total: ₦${total.toLocaleString()}`
     );
 
     try {
@@ -87,8 +127,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, order });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to create order';
+    const isAvailabilityError = message.includes('available') || message.includes('stock');
+    return NextResponse.json({ error: message }, { status: isAvailabilityError ? 409 : 500 });
   }
 }
-

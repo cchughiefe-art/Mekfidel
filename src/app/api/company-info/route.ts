@@ -14,6 +14,7 @@ export async function GET(request: Request) {
         .from('company_info')
         .select('*')
         .eq('info_key', key)
+        .eq('is_active', true)
         .single();
       
       if (error) throw error;
@@ -23,6 +24,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase
       .from('company_info')
       .select('*')
+      .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;

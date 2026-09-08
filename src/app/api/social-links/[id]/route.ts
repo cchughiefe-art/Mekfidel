@@ -14,6 +14,7 @@ export async function GET(request: Request, { params }: Params) {
       .from('social_links')
       .select('*')
       .eq('id', id)
+      .eq('is_visible', true)
       .single();
 
     if (error) throw error;

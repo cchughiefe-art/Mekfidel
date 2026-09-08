@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS customers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   name TEXT NOT NULL,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   phone TEXT NOT NULL,
   address TEXT,
   state TEXT,
@@ -168,10 +168,11 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 CREATE TABLE IF NOT EXISTS faqs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   question TEXT NOT NULL,
   answer TEXT NOT NULL,
   category TEXT,
-  "order" INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0,
   is_published BOOLEAN DEFAULT TRUE
 );
 
@@ -182,13 +183,17 @@ CREATE TABLE IF NOT EXISTS faqs (
 CREATE TABLE IF NOT EXISTS testimonials (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   name TEXT NOT NULL,
   role TEXT,
   company TEXT,
   content TEXT NOT NULL,
   rating INTEGER DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
   image TEXT,
-  is_published BOOLEAN DEFAULT TRUE
+  avatar TEXT,
+  is_published BOOLEAN DEFAULT TRUE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  sort_order INTEGER DEFAULT 0
 );
 
 -- ============================================================
@@ -576,6 +581,7 @@ CREATE POLICY "Public read social_links" ON social_links FOR SELECT USING (is_vi
 CREATE POLICY "Public read uploaded_icons" ON uploaded_icons FOR SELECT USING (true);
 CREATE POLICY "Public read content_blocks" ON content_blocks FOR SELECT USING (is_active = true);
 CREATE POLICY "Public read company_info" ON company_info FOR SELECT USING (is_active = true);
+CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
 -- Admin full access (existing)
 CREATE POLICY "Admin full access" ON categories FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
@@ -694,7 +700,7 @@ INSERT INTO testimonials (name, role, company, content, rating, sort_order, is_p
 ON CONFLICT DO NOTHING;
 
 -- Seed default FAQs
-INSERT INTO faqs (question, answer, category, "order", is_published) VALUES
+INSERT INTO faqs (question, answer, category, sort_order, is_published) VALUES
   ('What products do you sell?', 'We sell mobile phones, phone accessories, replacement screens, spare parts, and offer professional repair services for all major phone brands.', 'Products', 1, true),
   ('Do you offer warranty on your products?', 'Yes, all our products come with manufacturer warranty. The warranty period varies by product. Ask our staff for specific warranty details.', 'Products', 2, true),
   ('Do you ship nationwide?', 'Yes, we offer delivery services across Nigeria. Shipping fees and delivery times vary by location.', 'Shipping', 3, true),
