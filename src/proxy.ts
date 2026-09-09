@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const protectedApiPrefixes = [
+  '/api/ai-cms',
   '/api/company-info',
   '/api/feature-cards',
   '/api/footer',

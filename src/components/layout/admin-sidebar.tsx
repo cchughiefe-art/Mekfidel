@@ -29,12 +29,14 @@ import {
   ImageIcon,
   Star,
   HelpCircle,
+  Sparkles,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const sidebarLinks = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'AI Assistant', href: '/admin/ai-assistant', icon: Sparkles },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Categories', href: '/admin/categories', icon: Tags },
   { name: 'Brands', href: '/admin/brands', icon: Bookmark },
@@ -268,6 +270,5 @@ export function AdminSidebar() {
     </>
   );
 }
-
 
 

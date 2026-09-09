@@ -1,4 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
+import 'server-only';
 import { cookies } from 'next/headers';
 
 export async function createServerSupabaseClient() {
@@ -46,4 +48,14 @@ export async function createAdminClient() {
   }
 
   return supabase;
+}
+
+export function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) throw new Error('Supabase service role is not configured');
+
+  return createClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
