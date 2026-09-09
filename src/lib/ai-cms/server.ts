@@ -37,40 +37,6 @@ const objectFields = new Set(['specifications','metadata','links','social_media'
 const uuidFields = new Set(['category_id','brand_id','parent_id','section_id']);
 const uuidSchema = z.string().uuid();
 
-const changeProperties = Object.fromEntries(
-  [...new Set(Object.values(RESOURCES).flatMap(config => config.fields))].map(field => {
-    if (booleanFields.has(field)) return [field, { type: 'boolean' }];
-    if (numberFields.has(field)) return [field, { type: 'number' }];
-    if (arrayFields.has(field)) return [field, { type: 'array', items: { type: 'string' } }];
-    if (objectFields.has(field)) return [field, { type: 'object' }];
-    return [field, { type: 'string' }];
-  })
-);
-
-const GEMINI_SCHEMA = {
-  type: 'object',
-  properties: {
-    summary: { type: 'string' },
-    answer: { type: 'string' },
-    warnings: { type: 'array', items: { type: 'string' } },
-    actions: {
-      type: 'array', maxItems: 15,
-      items: {
-        type: 'object',
-        properties: {
-          operation: { type: 'string', enum: ['create', 'update', 'delete'] },
-          resource: { type: 'string', enum: cmsResourceSchema.options },
-          targetId: { type: 'string' },
-          targetLabel: { type: 'string' },
-          changes: { type: 'object', properties: changeProperties },
-        },
-        required: ['operation', 'resource', 'targetLabel', 'changes'],
-      },
-    },
-  },
-  required: ['summary', 'answer', 'warnings', 'actions'],
-};
-
 function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 100);
 }
@@ -142,13 +108,16 @@ ADMIN INSTRUCTION:
 ${instruction}
 
 CMS_CONTEXT:
-${JSON.stringify(context)}`;
+${JSON.stringify(context)}
+
+Return only valid JSON in exactly this shape:
+{"summary":"short preview summary","answer":"optional informational answer","warnings":["warning"],"actions":[{"operation":"create|update|delete","resource":"approved resource name","targetId":"existing UUID for update/delete only","targetLabel":"human-readable target","changes":{"approved_field":"new value"}}]}`;
 
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json', responseJsonSchema: GEMINI_SCHEMA } }),
+    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json' } }),
     signal: AbortSignal.timeout(30000),
   });
   const body = await response.json();
