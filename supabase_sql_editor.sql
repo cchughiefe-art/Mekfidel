@@ -1,6 +1,6 @@
 -- ============================================================
--- MEKFIDEL CMS - CONSOLIDATED SQL FOR SUPABASE SQL EDITOR
--- Execute this entire file in Supabase SQL Editor
+-- MEKFIDEL CMS - COMPLETE IDEMPOTENT DATABASE BOOTSTRAP
+-- Safe for both new projects and existing projects with partial schemas.
 -- ============================================================
 -- This file contains all database schema, indexes, triggers, RLS, and seed data
 -- Copy and paste the entire content into your Supabase SQL Editor
@@ -210,14 +210,14 @@ CREATE TABLE IF NOT EXISTS settings (
   address TEXT DEFAULT 'Lagos, Nigeria',
   business_hours TEXT DEFAULT 'Mon - Sat: 8AM - 6PM',
   social_media JSONB DEFAULT '{"facebook": "", "instagram": "", "twitter": "", "linkedin": "", "youtube": "", "tiktok": ""}',
-  homepage_hero_title TEXT DEFAULT 'Your Premium Mobile Phone Destination',
-  homepage_hero_subtitle TEXT DEFAULT 'Discover the latest mobile phones, quality accessories, genuine spare parts, and professional repair services.',
+  homepage_hero_title TEXT DEFAULT 'Professional Phone Repair Tools & Screens',
+  homepage_hero_subtitle TEXT DEFAULT 'Quality repair tools, replacement screens and spare parts for phone technicians.',
   hero_banner TEXT,
-  about_text TEXT DEFAULT 'Mekfidel Communication Ltd is your trusted partner for mobile phones, accessories, and repair services across Nigeria.',
-  footer_text TEXT DEFAULT 'Your trusted partner for mobile technology.',
-  seo_title TEXT DEFAULT 'Mekfidel Communication Ltd - Mobile Phones, Accessories & Repair Services',
-  seo_description TEXT DEFAULT 'Your trusted partner for mobile phones, phone accessories, phone screens, spare parts, and professional phone repair services across Nigeria.',
-  seo_keywords TEXT DEFAULT 'Mekfidel Communication, mobile phones Nigeria, phone accessories, phone repair, phone screens Nigeria',
+  about_text TEXT DEFAULT 'Mekfidel Communication Ltd supplies phone repair tools, replacement screens and spare parts in Nigeria.',
+  footer_text TEXT DEFAULT 'Reliable tools and replacement parts for phone technicians.',
+  seo_title TEXT DEFAULT 'Mekfidel Communication Ltd - Phone Repair Tools & Screens',
+  seo_description TEXT DEFAULT 'Shop phone repair tools, replacement screens and spare parts from Mekfidel Communication Ltd in Nigeria.',
+  seo_keywords TEXT DEFAULT 'phone repair tools Nigeria, replacement screens Lagos, phone spare parts, Mekfidel Communication',
   google_maps_embed TEXT,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -235,6 +235,23 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Security-definer helper prevents recursive RLS checks on profiles.
+CREATE OR REPLACE FUNCTION public.is_cms_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role IN ('admin', 'editor')
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_cms_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_cms_admin() TO authenticated;
+
 -- ============================================================
 -- MEDIA (Existing)
 -- ============================================================
@@ -251,6 +268,25 @@ CREATE TABLE IF NOT EXISTS media (
   width INTEGER,
   height INTEGER
 );
+
+-- Repair older/partial Mekfidel schemas without deleting existing data.
+ALTER TABLE public.faqs
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+
+ALTER TABLE public.testimonials
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS avatar TEXT,
+  ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+
+ALTER TABLE public.services
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS icon TEXT,
+  ADD COLUMN IF NOT EXISTS color TEXT DEFAULT 'bg-blue-50 text-blue-600',
+  ADD COLUMN IF NOT EXISTS features TEXT[] DEFAULT ARRAY[]::TEXT[],
+  ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 -- ============================================================
 -- HOMEPAGE SECTIONS (NEW - CMS)
@@ -422,6 +458,27 @@ CREATE TABLE IF NOT EXISTS company_info (
 );
 
 -- ============================================================
+-- AI CMS CHANGE AUDIT AND ROLLBACK
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.ai_change_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  instruction TEXT NOT NULL CHECK (char_length(instruction) BETWEEN 3 AND 2000),
+  summary TEXT NOT NULL,
+  actions JSONB NOT NULL DEFAULT '[]'::JSONB,
+  rollback_actions JSONB NOT NULL DEFAULT '[]'::JSONB,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'applying', 'applied', 'failed', 'rolled_back')),
+  applied_at TIMESTAMPTZ,
+  rolled_back_at TIMESTAMPTZ,
+  error TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_change_requests_created_at ON public.ai_change_requests(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_change_requests_created_by ON public.ai_change_requests(created_by);
+
+-- ============================================================
 -- INDEXES (All)
 -- ============================================================
 
@@ -498,12 +555,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Existing triggers
+DROP TRIGGER IF EXISTS update_products_updated_at ON products;
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
+DROP TRIGGER IF EXISTS update_services_updated_at ON services;
+DROP TRIGGER IF EXISTS update_settings_updated_at ON settings;
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_services_updated_at BEFORE UPDATE ON services FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_settings_updated_at BEFORE UPDATE ON settings FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- CMS triggers
+DROP TRIGGER IF EXISTS update_homepage_sections_updated_at ON homepage_sections;
+DROP TRIGGER IF EXISTS update_feature_cards_updated_at ON feature_cards;
+DROP TRIGGER IF EXISTS update_statistics_updated_at ON statistics;
+DROP TRIGGER IF EXISTS update_navigation_items_updated_at ON navigation_items;
+DROP TRIGGER IF EXISTS update_footer_sections_updated_at ON footer_sections;
+DROP TRIGGER IF EXISTS update_social_links_updated_at ON social_links;
+DROP TRIGGER IF EXISTS update_testimonials_updated_at ON testimonials;
+DROP TRIGGER IF EXISTS update_faqs_updated_at ON faqs;
+DROP TRIGGER IF EXISTS update_content_blocks_updated_at ON content_blocks;
+DROP TRIGGER IF EXISTS update_company_info_updated_at ON company_info;
 CREATE TRIGGER update_homepage_sections_updated_at BEFORE UPDATE ON homepage_sections FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_feature_cards_updated_at BEFORE UPDATE ON feature_cards FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_statistics_updated_at BEFORE UPDATE ON statistics FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -559,8 +630,36 @@ ALTER TABLE social_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE uploaded_icons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE content_blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE company_info ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_change_requests ENABLE ROW LEVEL SECURITY;
 
 -- Public read access (existing)
+DO $$
+DECLARE policy_record RECORD;
+BEGIN
+  FOR policy_record IN
+    SELECT schemaname, tablename, policyname
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND policyname IN (
+        'Public read access', 'Admin full access', 'Users read own profile',
+        'Admins read profiles', 'Public read homepage_sections',
+        'Public read feature_cards', 'Public read statistics',
+        'Public read navigation_items', 'Public read footer_sections',
+        'Public read social_links', 'Public read uploaded_icons',
+        'Public read content_blocks', 'Public read company_info',
+        'Admin full homepage_sections', 'Admin full feature_cards',
+        'Admin full statistics', 'Admin full navigation_items',
+        'Admin full footer_sections', 'Admin full social_links',
+        'Admin full uploaded_icons', 'Admin full content_blocks',
+        'Admin full company_info', 'Admins read own AI change requests',
+        'Admins manage AI change requests'
+      )
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I',
+      policy_record.policyname, policy_record.schemaname, policy_record.tablename);
+  END LOOP;
+END $$;
+
 CREATE POLICY "Public read access" ON categories FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON brands FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON products FOR SELECT USING (is_active = true);
@@ -582,39 +681,49 @@ CREATE POLICY "Public read uploaded_icons" ON uploaded_icons FOR SELECT USING (t
 CREATE POLICY "Public read content_blocks" ON content_blocks FOR SELECT USING (is_active = true);
 CREATE POLICY "Public read company_info" ON company_info FOR SELECT USING (is_active = true);
 CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Admins read profiles" ON profiles FOR SELECT USING (public.is_cms_admin());
 
 -- Admin full access (existing)
-CREATE POLICY "Admin full access" ON categories FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON brands FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON products FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON orders FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON order_items FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON customers FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON screen_compatibility FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON blog_posts FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON faqs FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON testimonials FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON settings FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON services FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full access" ON media FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
+CREATE POLICY "Admin full access" ON categories FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON brands FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON products FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON orders FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON order_items FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON customers FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON screen_compatibility FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON blog_posts FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON faqs FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON testimonials FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON settings FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON services FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full access" ON media FOR ALL USING (public.is_cms_admin());
 
 -- Admin full access (CMS)
-CREATE POLICY "Admin full homepage_sections" ON homepage_sections FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full feature_cards" ON feature_cards FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full statistics" ON statistics FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full navigation_items" ON navigation_items FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full footer_sections" ON footer_sections FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full social_links" ON social_links FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full uploaded_icons" ON uploaded_icons FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full content_blocks" ON content_blocks FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
-CREATE POLICY "Admin full company_info" ON company_info FOR ALL USING (auth.uid() IN (SELECT id FROM profiles WHERE role IN ('admin', 'editor')));
+CREATE POLICY "Admin full homepage_sections" ON homepage_sections FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full feature_cards" ON feature_cards FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full statistics" ON statistics FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full navigation_items" ON navigation_items FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full footer_sections" ON footer_sections FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full social_links" ON social_links FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full uploaded_icons" ON uploaded_icons FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full content_blocks" ON content_blocks FOR ALL USING (public.is_cms_admin());
+CREATE POLICY "Admin full company_info" ON company_info FOR ALL USING (public.is_cms_admin());
+
+CREATE POLICY "Admins read own AI change requests"
+  ON ai_change_requests FOR SELECT
+  USING (auth.uid() = created_by AND public.is_cms_admin());
+
+REVOKE ALL ON public.ai_change_requests FROM anon;
+REVOKE ALL ON public.ai_change_requests FROM authenticated;
+GRANT SELECT ON public.ai_change_requests TO authenticated;
 
 -- ============================================================
 -- INSERT DEFAULT SETTINGS
 -- ============================================================
 
-INSERT INTO settings (company_name) VALUES ('Mekfidel Communication Ltd')
-ON CONFLICT DO NOTHING;
+INSERT INTO settings (company_name)
+SELECT 'Mekfidel Communication Ltd'
+WHERE NOT EXISTS (SELECT 1 FROM settings);
 
 -- ============================================================
 -- SEED DATA (CMS)
@@ -622,8 +731,8 @@ ON CONFLICT DO NOTHING;
 
 -- Seed default homepage sections
 INSERT INTO homepage_sections (section_key, section_type, title, subtitle, description, button_text, button_url, sort_order, is_active, metadata) VALUES
-  ('hero', 'hero', 'Your Premium Mobile Phone Destination', 'Discover the latest mobile phones, quality accessories, genuine spare parts, and professional repair services.', 'Shop Now', '/products', 1, true, '{"trust_badge": "Trusted Phone Dealer in Nigeria"}'),
-  ('about_intro', 'features_grid', 'Why Choose Mekfidel Communication?', 'We combine quality products with exceptional service to deliver the best mobile experience in Nigeria.', NULL, NULL, 2, true, '{}'),
+  ('hero', 'hero', 'Professional Phone Repair Tools & Screens', 'Quality repair tools, replacement screens and spare parts for phone technicians.', 'Browse Products', '/products', 1, true, '{"trust_badge": "Trusted Phone Parts Vendor in Lagos"}'),
+  ('about_intro', 'features_grid', 'Why Choose Mekfidel Communication?', 'Reliable tools, screens and spare parts for professional phone technicians and resellers.', NULL, NULL, 2, true, '{}'),
   ('cta', 'cta', 'Ready to Experience the Difference?', 'Visit our store or browse our catalog online. We are here to help.', 'Contact Us', '/contact', 4, true, '{"button_secondary": "Browse Products|/products"}'),
   ('how_it_works', 'steps', 'How It Works', 'Simple steps to get started with our services.', NULL, NULL, 5, true, '{}')
 ON CONFLICT (section_key) DO NOTHING;
@@ -633,24 +742,33 @@ INSERT INTO feature_cards (section_id, title, description, icon_library, icon_na
 SELECT hs.id, fc.title, fc.description, fc.icon_library, fc.icon_name, fc.icon_color, fc.sort_order, true
 FROM homepage_sections hs
 CROSS JOIN (VALUES
-  ('Genuine Products', '100% authentic mobile phones and accessories sourced directly from trusted manufacturers.', 'lucide', 'Shield', 'text-blue-600', 1),
-  ('Expert Service', 'Professional phone repair services by certified technicians with years of experience.', 'lucide', 'Award', 'text-blue-600', 2),
+  ('Quality Parts', 'Dependable replacement screens, spare parts and repair tools for technicians.', 'lucide', 'Shield', 'text-blue-600', 1),
+  ('Product Guidance', 'Practical compatibility guidance to help you select the correct replacement part.', 'lucide', 'Award', 'text-blue-600', 2),
   ('Customer Support', 'Dedicated support team ready to help you with any questions or concerns.', 'lucide', 'Headphones', 'text-blue-600', 3),
   ('Fast Delivery', 'Nationwide shipping with fast and reliable delivery right to your doorstep.', 'lucide', 'Truck', 'text-blue-600', 4)
 ) AS fc(title, description, icon_library, icon_name, icon_color, sort_order)
 WHERE hs.section_key = 'about_intro'
-ON CONFLICT DO NOTHING;
+  AND NOT EXISTS (
+    SELECT 1 FROM feature_cards existing
+    WHERE existing.section_id = hs.id AND existing.title = fc.title
+  );
 
 -- Seed default statistics
-INSERT INTO statistics (context, label, value, suffix, icon_library, icon_name, sort_order, is_active) VALUES
+INSERT INTO statistics (context, label, value, suffix, icon_library, icon_name, sort_order, is_active)
+SELECT seed.* FROM (VALUES
   ('homepage', 'Years Experience', '5', '+', 'lucide', 'Clock', 1, true),
   ('homepage', 'Happy Customers', '1000', '+', 'lucide', 'Users', 2, true),
   ('homepage', 'Products Sold', '5000', '+', 'lucide', 'Package', 3, true),
   ('homepage', 'Brands Available', '50', '+', 'lucide', 'Award', 4, true)
-ON CONFLICT DO NOTHING;
+) AS seed(context, label, value, suffix, icon_library, icon_name, sort_order, is_active)
+WHERE NOT EXISTS (
+  SELECT 1 FROM statistics existing
+  WHERE existing.context = seed.context AND existing.label = seed.label
+);
 
 -- Seed default navigation items
-INSERT INTO navigation_items (location, label, url, sort_order, is_active) VALUES
+INSERT INTO navigation_items (location, label, url, sort_order, is_active)
+SELECT seed.* FROM (VALUES
   ('header', 'Home', '/', 1, true),
   ('header', 'Products', '/products', 2, true),
   ('header', 'Phone Screen Compatibility', '/phone-screen-compatibility', 3, true),
@@ -666,12 +784,16 @@ INSERT INTO navigation_items (location, label, url, sort_order, is_active) VALUE
   ('footer_main', 'Blog', '/blog', 5, true),
   ('footer_main', 'Contact', '/contact', 6, true),
   ('footer_main', 'FAQ', '/faq', 7, true),
-  ('footer_categories', 'Mobile Phones', '/products?category=mobile-phones', 1, true),
-  ('footer_categories', 'Phone Accessories', '/products?category=accessories', 2, true),
+  ('footer_categories', 'Repair Tools', '/products?category=repair-tools', 1, true),
+  ('footer_categories', 'Screen Machines', '/products?category=screen-machines', 2, true),
   ('footer_categories', 'Phone Screens', '/products?category=screens', 3, true),
   ('footer_categories', 'Spare Parts', '/products?category=spare-parts', 4, true),
-  ('footer_categories', 'Phone Repair', '/services', 5, true)
-ON CONFLICT DO NOTHING;
+  ('footer_categories', 'Repair Supplies', '/products?category=repair-supplies', 5, true)
+) AS seed(location, label, url, sort_order, is_active)
+WHERE NOT EXISTS (
+  SELECT 1 FROM navigation_items existing
+  WHERE existing.location = seed.location AND existing.label = seed.label AND existing.url = seed.url
+);
 
 -- Seed default footer sections
 INSERT INTO footer_sections (section_key, title, content, sort_order, is_active) VALUES
@@ -693,20 +815,29 @@ INSERT INTO social_links (platform, label, icon_name, url, sort_order, is_visibl
 ON CONFLICT (platform) DO NOTHING;
 
 -- Seed default testimonials
-INSERT INTO testimonials (name, role, company, content, rating, sort_order, is_published, is_featured) VALUES
+INSERT INTO testimonials (name, role, company, content, rating, sort_order, is_published, is_featured)
+SELECT seed.* FROM (VALUES
   ('Emmanuel Okonkwo', 'Business Owner', 'Ema Ventures', 'Mekfidel has been my go-to for all phone purchases. Their prices are competitive and the quality is always top-notch. Highly recommended!', 5, 1, true, true),
   ('Blessing Adeyemi', 'Student', NULL, 'I got my phone screen replaced here and the service was excellent. Fast, affordable, and professional. The staff are very helpful.', 5, 2, true, true),
   ('Chidi Nwachukwu', 'Tech Enthusiast', NULL, 'Best phone store in Lagos! They have a wide variety of accessories and spare parts. Great customer service too.', 5, 3, true, false)
-ON CONFLICT DO NOTHING;
+) AS seed(name, role, company, content, rating, sort_order, is_published, is_featured)
+WHERE NOT EXISTS (
+  SELECT 1 FROM testimonials existing
+  WHERE existing.name = seed.name AND existing.content = seed.content
+);
 
 -- Seed default FAQs
-INSERT INTO faqs (question, answer, category, sort_order, is_published) VALUES
+INSERT INTO faqs (question, answer, category, sort_order, is_published)
+SELECT seed.* FROM (VALUES
   ('What products do you sell?', 'We sell mobile phones, phone accessories, replacement screens, spare parts, and offer professional repair services for all major phone brands.', 'Products', 1, true),
   ('Do you offer warranty on your products?', 'Yes, all our products come with manufacturer warranty. The warranty period varies by product. Ask our staff for specific warranty details.', 'Products', 2, true),
   ('Do you ship nationwide?', 'Yes, we offer delivery services across Nigeria. Shipping fees and delivery times vary by location.', 'Shipping', 3, true),
   ('How long does phone repair take?', 'Most repairs are completed within 1-2 hours. Complex repairs may take longer depending on parts availability.', 'Services', 4, true),
   ('What payment methods do you accept?', 'We accept cash, bank transfers, and mobile money payments.', 'Payment', 5, true)
-ON CONFLICT DO NOTHING;
+) AS seed(question, answer, category, sort_order, is_published)
+WHERE NOT EXISTS (
+  SELECT 1 FROM faqs existing WHERE existing.question = seed.question
+);
 
 -- Seed default company info
 INSERT INTO company_info (info_key, info_type, title, content, sort_order, is_active) VALUES
@@ -754,6 +885,9 @@ CREATE POLICY "Public read gallery" ON storage.objects FOR SELECT USING (bucket_
 CREATE POLICY "Public read blog" ON storage.objects FOR SELECT USING (bucket_id = 'blog');
 CREATE POLICY "Public read icons" ON storage.objects FOR SELECT USING (bucket_id = 'icons');
 CREATE POLICY "Public read uploads" ON storage.objects FOR SELECT USING (bucket_id = 'uploads');
+
+-- Ask PostgREST to immediately refresh its table cache after setup.
+NOTIFY pgrst, 'reload schema';
 
 -- ============================================================
 -- END OF SQL

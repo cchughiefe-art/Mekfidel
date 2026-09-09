@@ -19,7 +19,26 @@ const GEMINI_SCHEMA = {
           type: { type: 'string', enum: ['update_product', 'update_homepage_section', 'update_company_info', 'create_category'] },
           targetId: { type: 'string' },
           targetLabel: { type: 'string' },
-          changes: { type: 'object' },
+          changes: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              description: { type: 'string' },
+              price: { type: 'number' },
+              compare_price: { type: 'number' },
+              stock: { type: 'integer' },
+              availability: { type: 'string', enum: ['in_stock', 'out_of_stock', 'pre_order'] },
+              is_featured: { type: 'boolean' },
+              is_active: { type: 'boolean' },
+              seo_title: { type: 'string' },
+              seo_description: { type: 'string' },
+              title: { type: 'string' },
+              subtitle: { type: 'string' },
+              content: { type: 'string' },
+              button_text: { type: 'string' },
+              button_url: { type: 'string' },
+            },
+          },
         },
         required: ['type', 'targetLabel', 'changes'],
       },
@@ -43,19 +62,31 @@ export async function createAiPlan(supabase: SupabaseClient, instruction: string
     supabase.from('company_info').select('id,info_key,title,content,is_active').order('sort_order').limit(100),
   ]);
 
-  for (const result of [products, categories, sections, companyInfo]) {
-    if (result.error) throw new Error(`Could not load CMS context: ${result.error.message}`);
-  }
+  const contextResults = [
+    ['products', products],
+    ['categories', categories],
+    ['homepage_sections', sections],
+    ['company_info', companyInfo],
+  ] as const;
+  const unavailableTables = contextResults
+    .filter(([, result]) => result.error)
+    .map(([table]) => table);
+
+  const unexpectedError = contextResults.find(([, result]) =>
+    result.error && result.error.code !== 'PGRST205' && !result.error.message.includes('schema cache')
+  )?.[1].error;
+  if (unexpectedError) throw new Error(`Could not load CMS context: ${unexpectedError.message}`);
 
   const context = {
-    products: products.data,
-    categories: categories.data,
-    homepageSections: sections.data,
-    companyInfo: companyInfo.data,
+    unavailableTables,
+    products: products.data || [],
+    categories: categories.data || [],
+    homepageSections: sections.data || [],
+    companyInfo: companyInfo.data || [],
   };
 
   const prompt = `You are the Mekfidel CMS planning assistant. Mekfidel sells phone repair tools and replacement screens.
-Create a safe change preview from the administrator's instruction. Never invent IDs: use only IDs in CMS_CONTEXT. Never produce SQL, code, deletes, user/role changes, auth changes, file uploads, or fields outside the allowed actions. If the request is informational, answer it and return no actions. If a requested target is ambiguous or absent, return no action and explain what is needed in warnings.
+Create a safe change preview from the administrator's instruction. Never invent IDs: use only IDs in CMS_CONTEXT. Never produce SQL, code, deletes, user/role changes, auth changes, file uploads, or fields outside the allowed actions. If the request is informational, answer it and return no actions. If a requested target is ambiguous, absent, or its table appears in unavailableTables, return no action for it and explain what is needed in warnings.
 
 Allowed actions and changes:
 - update_product: targetId plus any of name, description, price, compare_price, stock, availability, is_featured, is_active, seo_title, seo_description.
@@ -95,7 +126,29 @@ ${JSON.stringify(context)}`;
 
   const text = body?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || '').join('');
   if (!text) throw new Error('Gemini returned an empty response');
-  return aiPlanSchema.parse(JSON.parse(text));
+  const rawPlan = JSON.parse(text);
+
+  // Some models may omit the duplicated category name when the target label
+  // already contains it. Normalise that harmless case before strict validation.
+  if (Array.isArray(rawPlan?.actions)) {
+    rawPlan.actions = rawPlan.actions.map((action: Record<string, unknown>) => {
+      if (action.type !== 'create_category') return action;
+      const changes = action.changes && typeof action.changes === 'object'
+        ? action.changes as Record<string, unknown>
+        : {};
+      return {
+        ...action,
+        changes: {
+          ...changes,
+          name: typeof changes.name === 'string' && changes.name.trim()
+            ? changes.name
+            : action.targetLabel,
+        },
+      };
+    });
+  }
+
+  return aiPlanSchema.parse(rawPlan);
 }
 
 const rollbackActionSchema = z.discriminatedUnion('type', [

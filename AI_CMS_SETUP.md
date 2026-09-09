@@ -4,11 +4,11 @@ The assistant is available at `/admin/ai-assistant`. It creates a preview first 
 
 ## 1. Prepare Supabase
 
-Open the Supabase dashboard, select the Mekfidel project, open **SQL Editor**, and run the complete contents of:
+Open the Supabase dashboard, select the Mekfidel project, open **SQL Editor**, and run the complete contents of the canonical database bootstrap:
 
-`sql/ai_cms_assistant.sql`
+`supabase_sql_editor.sql`
 
-This creates the private audit and rollback table. Only the admin who created a request can read its history. Browser clients cannot alter the audit records.
+It creates missing CMS tables, repairs older table columns, refreshes policies and triggers, prepares storage, and creates the private AI audit and rollback table. It is safe to run again and preserves existing content.
 
 ## 2. Create a free Gemini API key
 
