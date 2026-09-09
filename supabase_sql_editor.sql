@@ -731,10 +731,10 @@ WHERE NOT EXISTS (SELECT 1 FROM settings);
 
 -- Seed default homepage sections
 INSERT INTO homepage_sections (section_key, section_type, title, subtitle, description, button_text, button_url, sort_order, is_active, metadata) VALUES
-  ('hero', 'hero', 'Professional Phone Repair Tools & Screens', 'Quality repair tools, replacement screens and spare parts for phone technicians.', 'Browse Products', '/products', 1, true, '{"trust_badge": "Trusted Phone Parts Vendor in Lagos"}'),
-  ('about_intro', 'features_grid', 'Why Choose Mekfidel Communication?', 'Reliable tools, screens and spare parts for professional phone technicians and resellers.', NULL, NULL, 2, true, '{}'),
-  ('cta', 'cta', 'Ready to Experience the Difference?', 'Visit our store or browse our catalog online. We are here to help.', 'Contact Us', '/contact', 4, true, '{"button_secondary": "Browse Products|/products"}'),
-  ('how_it_works', 'steps', 'How It Works', 'Simple steps to get started with our services.', NULL, NULL, 5, true, '{}')
+  ('hero', 'hero', 'Professional Phone Repair Tools & Screens', 'Quality repair tools, replacement screens and spare parts for phone technicians.', 'Find dependable equipment and compatible parts for your repair business.', 'Browse Products', '/products', 1, true, '{"trust_badge": "Trusted Phone Parts Vendor in Lagos"}'),
+  ('about_intro', 'features_grid', 'Why Choose Mekfidel Communication?', 'Reliable tools, screens and spare parts for professional phone technicians and resellers.', 'Get product guidance, fair pricing and dependable support from a specialist supplier.', NULL, NULL, 2, true, '{}'),
+  ('cta', 'cta', 'Ready to Find the Right Part?', 'Visit our store or browse our product catalogue online.', 'Contact us for availability, compatibility guidance and current pricing.', 'Contact Us', '/contact', 4, true, '{"button_secondary": "Browse Products|/products"}'),
+  ('how_it_works', 'steps', 'How It Works', 'A simple way to order the tools and parts you need.', 'Tell us what you need, confirm compatibility, receive a quote, and arrange pickup or delivery.', NULL, NULL, 5, true, '{}')
 ON CONFLICT (section_key) DO NOTHING;
 
 -- Seed default feature cards
@@ -817,9 +817,9 @@ ON CONFLICT (platform) DO NOTHING;
 -- Seed default testimonials
 INSERT INTO testimonials (name, role, company, content, rating, sort_order, is_published, is_featured)
 SELECT seed.* FROM (VALUES
-  ('Emmanuel Okonkwo', 'Business Owner', 'Ema Ventures', 'Mekfidel has been my go-to for all phone purchases. Their prices are competitive and the quality is always top-notch. Highly recommended!', 5, 1, true, true),
-  ('Blessing Adeyemi', 'Student', NULL, 'I got my phone screen replaced here and the service was excellent. Fast, affordable, and professional. The staff are very helpful.', 5, 2, true, true),
-  ('Chidi Nwachukwu', 'Tech Enthusiast', NULL, 'Best phone store in Lagos! They have a wide variety of accessories and spare parts. Great customer service too.', 5, 3, true, false)
+  ('Emmanuel Okonkwo', 'Phone Technician', 'Ema Ventures', 'Mekfidel is my reliable source for repair tools and replacement screens. The products are dependable and competitively priced.', 5, 1, true, true),
+  ('Blessing Adeyemi', 'Parts Reseller', NULL, 'Their team helped me choose compatible replacement screens and the order arrived in good condition.', 5, 2, true, true),
+  ('Chidi Nwachukwu', 'Phone Technician', NULL, 'A dependable supplier for phone repair tools, screens and spare parts in Lagos.', 5, 3, true, false)
 ) AS seed(name, role, company, content, rating, sort_order, is_published, is_featured)
 WHERE NOT EXISTS (
   SELECT 1 FROM testimonials existing
@@ -829,10 +829,10 @@ WHERE NOT EXISTS (
 -- Seed default FAQs
 INSERT INTO faqs (question, answer, category, sort_order, is_published)
 SELECT seed.* FROM (VALUES
-  ('What products do you sell?', 'We sell mobile phones, phone accessories, replacement screens, spare parts, and offer professional repair services for all major phone brands.', 'Products', 1, true),
-  ('Do you offer warranty on your products?', 'Yes, all our products come with manufacturer warranty. The warranty period varies by product. Ask our staff for specific warranty details.', 'Products', 2, true),
+  ('What products do you sell?', 'We supply phone repair tools, replacement screens, screen machines, spare parts and repair consumables for technicians and resellers.', 'Products', 1, true),
+  ('Do you offer warranty on your products?', 'Warranty coverage depends on the product and manufacturer. Confirm the applicable warranty with our team before purchasing.', 'Products', 2, true),
   ('Do you ship nationwide?', 'Yes, we offer delivery services across Nigeria. Shipping fees and delivery times vary by location.', 'Shipping', 3, true),
-  ('How long does phone repair take?', 'Most repairs are completed within 1-2 hours. Complex repairs may take longer depending on parts availability.', 'Services', 4, true),
+  ('Do you repair phones?', 'No. Mekfidel supplies tools, replacement screens and spare parts to phone technicians and resellers; we do not provide phone repair services.', 'Products', 4, true),
   ('What payment methods do you accept?', 'We accept cash, bank transfers, and mobile money payments.', 'Payment', 5, true)
 ) AS seed(question, answer, category, sort_order, is_published)
 WHERE NOT EXISTS (
@@ -841,18 +841,18 @@ WHERE NOT EXISTS (
 
 -- Seed default company info
 INSERT INTO company_info (info_key, info_type, title, content, sort_order, is_active) VALUES
-  ('story', 'text', 'Our Story', 'Mekfidel Communication Ltd was founded with a simple mission: to provide Nigerians with access to quality mobile phones, genuine accessories, and reliable repair services at affordable prices.', 1, true),
-  ('mission', 'text', 'Our Mission', 'To provide every Nigerian with access to quality mobile phones, genuine accessories, and professional repair services at the best possible prices, delivered with exceptional customer service.', 2, true),
-  ('vision', 'text', 'Our Vision', 'To become Nigeria''s most trusted mobile phone retailer and repair service provider, known for quality, reliability, and innovation in everything we do.', 3, true),
+  ('story', 'text', 'Our Story', 'Mekfidel Communication Ltd supplies dependable phone repair tools, replacement screens and spare parts to technicians and resellers in Nigeria.', 1, true),
+  ('mission', 'text', 'Our Mission', 'To help phone technicians and resellers access reliable repair tools, compatible replacement screens and quality spare parts at fair prices.', 2, true),
+  ('vision', 'text', 'Our Vision', 'To become Nigeria''s most trusted supplier of phone repair tools, replacement screens and spare parts.', 3, true),
   ('founded_year', 'number', NULL, '2020', 4, true)
 ON CONFLICT (info_key) DO NOTHING;
 
 -- Seed default content blocks
 INSERT INTO content_blocks (block_key, block_type, title, content, page, position, sort_order, is_active) VALUES
-  ('about_story', 'text', 'Our Story', 'Mekfidel Communication Ltd was founded with a simple mission: to provide Nigerians with access to quality mobile phones, genuine accessories, and reliable repair services at affordable prices. Starting as a small mobile phone retail shop in Lagos, we have grown into a trusted name in the Nigerian mobile phone industry. Our commitment to quality, transparency, and exceptional customer service has earned us the loyalty of thousands of customers across the country.', 'about', 'main', 1, true),
-  ('contact_info', 'text', NULL, NULL, 'contact', 'sidebar', 1, true),
-  ('services_hero', 'text', 'Our Services', 'Comprehensive mobile solutions from sales to repair and wholesale.', 'services', 'hero', 1, true),
-  ('how_it_works_steps', 'text', 'How It Works', 'Contact Us, Get a Quote, Service Delivery, Satisfaction', 'services', 'main', 1, true)
+  ('about_story', 'text', 'Our Story', 'Mekfidel Communication Ltd supplies phone repair tools, replacement screens and spare parts to technicians and resellers. From our base in Lagos, we focus on dependable products, compatibility guidance and responsive customer support.', 'about', 'main', 1, true),
+  ('contact_info', 'text', NULL, 'Contact Mekfidel for product availability, compatibility guidance, pricing and delivery information.', 'contact', 'sidebar', 1, true),
+  ('services_hero', 'text', 'What We Supply', 'Repair tools, replacement screens, spare parts and consumables for phone technicians and resellers.', 'services', 'hero', 1, true),
+  ('how_it_works_steps', 'text', 'How It Works', 'Tell us what you need, confirm compatibility, receive a quote, and arrange pickup or delivery.', 'services', 'main', 1, true)
 ON CONFLICT (block_key) DO NOTHING;
 
 -- ============================================================
