@@ -35,4 +35,4 @@ Start with a low-risk request such as: `Show me all products with 5 or fewer ite
 
 ## Safety limits
 
-The assistant can update approved fields on products, homepage sections, and company information, or create a category. It cannot run SQL, delete content, modify users or roles, change authentication, upload files, or bypass the confirmation step.
+The assistant has full create, update and delete control over products, categories, brands, compatibility records, blog posts, FAQs, testimonials, services, homepage sections, feature cards, statistics, navigation, footer content, social links, company information, content blocks and SEO/settings. All operations are field-validated, previewed, logged and reversible. It cannot access orders, customers, users, roles, authentication, secrets, infrastructure, file uploads or raw SQL.

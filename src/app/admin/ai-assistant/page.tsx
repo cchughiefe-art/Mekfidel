@@ -23,8 +23,8 @@ type HistoryItem = {
 const examples = [
   'Set the stock of product SKU MEK-001 to 12',
   'Change the homepage hero title to “Professional Phone Repair Tools & Screens”',
-  'Show me all products with 5 or fewer items in stock',
-  'Create a category called Screen Separating Machines',
+  'Create and publish a blog post about choosing replacement screens',
+  'Add an FAQ explaining nationwide delivery',
 ];
 
 async function api(body?: Record<string, string>) {
@@ -119,7 +119,7 @@ export default function AiAssistantPage() {
 
       <div className="rounded-2xl border border-green-200 bg-green-50 p-4 flex gap-3">
         <ShieldCheck className="w-5 h-5 text-green-700 shrink-0 mt-0.5" />
-        <p className="text-sm text-green-900">The assistant only uses approved CMS actions. It cannot run SQL, delete content, change admin accounts, or apply a change without your confirmation.</p>
+        <p className="text-sm text-green-900">The assistant has full CMS control, including creating, editing and deleting content. It cannot access accounts, customers, orders, secrets, infrastructure or raw SQL, and nothing is applied without your confirmation.</p>
       </div>
 
       <section className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 md:p-6 space-y-4">
@@ -163,9 +163,9 @@ export default function AiAssistantPage() {
           {preview.plan.actions.length > 0 ? (
             <div className="space-y-3">
               {preview.plan.actions.map((action, index) => (
-                <div key={`${action.type}-${index}`} className="rounded-xl border border-gray-200 p-4">
+                <div key={`${action.operation}-${action.resource}-${index}`} className="rounded-xl border border-gray-200 p-4">
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <Badge variant="info">{action.type.replaceAll('_', ' ')}</Badge>
+                    <Badge variant={action.operation === 'delete' ? 'danger' : 'info'}>{action.operation} {action.resource.replaceAll('_', ' ')}</Badge>
                     <span className="font-semibold text-gray-900">{action.targetLabel}</span>
                   </div>
                   <dl className="grid sm:grid-cols-2 gap-2 text-sm">
