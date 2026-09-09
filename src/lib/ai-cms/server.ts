@@ -49,13 +49,33 @@ function validateChanges(resource: CmsResource, changes: Record<string, unknown>
     if (!allowed.has(field)) throw new Error(`${field} is not an approved field for ${resource}`);
     if (value === undefined) continue;
     if (value === null) { clean[field] = null; continue; }
-    if (booleanFields.has(field) && typeof value !== 'boolean') throw new Error(`${field} must be true or false`);
-    if (numberFields.has(field) && (typeof value !== 'number' || !Number.isFinite(value))) throw new Error(`${field} must be a valid number`);
-    if (arrayFields.has(field) && (!Array.isArray(value) || value.length > 100 || value.some(item => typeof item !== 'string'))) throw new Error(`${field} must be a list of text values`);
-    if (objectFields.has(field) && (typeof value !== 'object' || JSON.stringify(value).length > 20000)) throw new Error(`${field} must be a small JSON object`);
-    if (!booleanFields.has(field) && !numberFields.has(field) && !arrayFields.has(field) && !objectFields.has(field) && (typeof value !== 'string' || value.length > 10000)) throw new Error(`${field} must be text`);
-    if (uuidFields.has(field) && value !== null) uuidSchema.parse(value);
-    clean[field] = value;
+
+    let normalized = value;
+    if (arrayFields.has(field) && typeof normalized === 'string') {
+      normalized = normalized.split(/[,\n]/).map(item => item.trim()).filter(Boolean);
+    }
+    if (numberFields.has(field) && typeof normalized === 'string' && normalized.trim() !== '') {
+      normalized = Number(normalized);
+    }
+    if (booleanFields.has(field) && typeof normalized === 'string') {
+      const lowerValue = normalized.toLowerCase();
+      if (lowerValue === 'true') normalized = true;
+      if (lowerValue === 'false') normalized = false;
+    }
+    if (objectFields.has(field) && typeof normalized === 'string') {
+      try { normalized = JSON.parse(normalized); } catch { throw new Error(`${field} must be valid JSON`); }
+    }
+    if (field === 'published_at' && typeof normalized === 'string' && normalized.toLowerCase() === 'now') {
+      normalized = new Date().toISOString();
+    }
+
+    if (booleanFields.has(field) && typeof normalized !== 'boolean') throw new Error(`${field} must be true or false`);
+    if (numberFields.has(field) && (typeof normalized !== 'number' || !Number.isFinite(normalized))) throw new Error(`${field} must be a valid number`);
+    if (arrayFields.has(field) && (!Array.isArray(normalized) || normalized.length > 100 || normalized.some(item => typeof item !== 'string'))) throw new Error(`${field} must be a list of text values`);
+    if (objectFields.has(field) && (typeof normalized !== 'object' || JSON.stringify(normalized).length > 20000)) throw new Error(`${field} must be a small JSON object`);
+    if (!booleanFields.has(field) && !numberFields.has(field) && !arrayFields.has(field) && !objectFields.has(field) && (typeof normalized !== 'string' || normalized.length > 10000)) throw new Error(`${field} must be text`);
+    if (uuidFields.has(field)) uuidSchema.parse(normalized);
+    clean[field] = normalized;
   }
 
   if (typeof clean.price === 'number' && clean.price < 0) throw new Error('Price cannot be negative');
