@@ -1,6 +1,6 @@
 # Mekfidel Communication Ltd
 
-A comprehensive, production-ready e-commerce and Content Management System (CMS) website for **Mekfidel Communication Ltd** — a Nigeria-based mobile phones, accessories, spare parts, and professional phone repair service provider.
+A comprehensive, production-ready e-commerce and Content Management System (CMS) website for **Mekfidel Communication Ltd** — a Nigeria-based supplier of phone repair tools, replacement screens, and spare parts.
 
 Built with **Next.js 16**, **TypeScript**, **Tailwind CSS 3**, **Supabase**, and featuring a fully dynamic CMS.
 
@@ -31,8 +31,8 @@ Built with **Next.js 16**, **TypeScript**, **Tailwind CSS 3**, **Supabase**, and
 
 Mekfidel Communication Ltd is a full-featured e-commerce platform that enables the business to:
 
-- Sell mobile phones, accessories, spare parts, and phone screens online
-- Offer professional phone repair services
+- Sell phone repair tools, replacement screens and spare parts online
+- Help customers select compatible parts and tools
 - Manage a blog for content marketing
 - Provide a screen compatibility checker for customers
 - Accept and process orders with status tracking
@@ -43,20 +43,20 @@ Mekfidel Communication Ltd is a full-featured e-commerce platform that enables t
 
 ## Tech Stack
 
-| Layer              | Technology                                              | Purpose                              |
-| ----------------- | ------------------------------------------------------- | ------------------------------------ |
-| **Framework**      | Next.js 16 (App Router)                                 | React framework with server components |
-| **Language**       | TypeScript                                              | Type-safe development                |
-| **Styling**        | Tailwind CSS v3                                         | Utility-first CSS framework          |
-| **Database**       | Supabase (PostgreSQL)                                    | Primary database with RLS            |
-| **Authentication**  | Supabase Auth                                           | User authentication and management   |
-| **Storage**        | Supabase Storage                                        | Media file storage (images, SVGs)   |
-| **State (Client)**  | Zustand + React Query                                   | Cart state and server state          |
-| **Forms**           | React Hook Form + Zod                                  | Form handling with validation        |
-| **UI Components**   | Custom shadcn/ui-style components                       | Consistent UI across the app        |
-| **Icons**           | Lucide React + Custom SVG                               | Icon library with CMS support       |
-| **Notifications**   | React Hot Toast                                         | Toast notifications                  |
-| **Validation**      | Zod                                                    | Runtime type validation             |
+| Layer              | Technology                        | Purpose                                |
+| ------------------ | --------------------------------- | -------------------------------------- |
+| **Framework**      | Next.js 16 (App Router)           | React framework with server components |
+| **Language**       | TypeScript                        | Type-safe development                  |
+| **Styling**        | Tailwind CSS v3                   | Utility-first CSS framework            |
+| **Database**       | Supabase (PostgreSQL)             | Primary database with RLS              |
+| **Authentication** | Supabase Auth                     | User authentication and management     |
+| **Storage**        | Supabase Storage                  | Media file storage (images, SVGs)      |
+| **State (Client)** | Zustand + React Query             | Cart state and server state            |
+| **Forms**          | React Hook Form + Zod             | Form handling with validation          |
+| **UI Components**  | Custom shadcn/ui-style components | Consistent UI across the app           |
+| **Icons**          | Lucide React + Custom SVG         | Icon library with CMS support          |
+| **Notifications**  | React Hot Toast                   | Toast notifications                    |
+| **Validation**     | Zod                               | Runtime type validation                |
 
 ---
 
@@ -64,50 +64,50 @@ Mekfidel Communication Ltd is a full-featured e-commerce platform that enables t
 
 ### Public Website
 
-| Page | Description |
-|------|-------------|
-| **Homepage** | Dynamic hero section, feature cards, statistics, product categories, testimonials carousel, CTA banners |
-| **Products** | Filterable/sortable product listing, detail pages with image gallery, specifications, features, related products |
-| **Product Categories** | Browse by category (mobile phones, accessories, screens, spare parts, tablets) |
-| **Phone Screen Compatibility** | Searchable database to find compatible replacement screens by phone model |
-| **Services** | Phone repair services overview, features, pricing, how-it-works steps |
-| **About** | Company story, mission, vision, statistics |
-| **Blog** | Articles with categories, tags, author info, SEO metadata, view counts |
-| **Contact** | Contact form with Supabase integration, company info, business hours |
-| **FAQ** | Frequently asked questions organized by category |
-| **Shopping Cart** | Persistent cart with checkout, order summary, delivery details |
-| **Search** | Full-text product search with real-time results |
-| **Legal Pages** | Privacy Policy, Terms of Service, Return Policy |
+| Page                           | Description                                                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **Homepage**                   | Dynamic hero section, feature cards, statistics, product categories, testimonials carousel, CTA banners          |
+| **Products**                   | Filterable/sortable product listing, detail pages with image gallery, specifications, features, related products |
+| **Product Categories**         | Browse by category (repair tools, screens and spare parts)                                                       |
+| **Phone Screen Compatibility** | Searchable database to find compatible replacement screens by phone model                                        |
+| **Services**                   | Tools and parts supply information and ordering steps                                                            |
+| **About**                      | Company story, mission, vision, statistics                                                                       |
+| **Blog**                       | Articles with categories, tags, author info, SEO metadata, view counts                                           |
+| **Contact**                    | Contact form with Supabase integration, company info, business hours                                             |
+| **FAQ**                        | Frequently asked questions organized by category                                                                 |
+| **Shopping Cart**              | Persistent cart with checkout, order summary, delivery details                                                   |
+| **Search**                     | Full-text product search with real-time results                                                                  |
+| **Legal Pages**                | Privacy Policy, Terms of Service, Return Policy                                                                  |
 
 ### Admin Dashboard
 
-| Section | Capabilities |
-|---------|-------------|
-| **Dashboard** | Overview stats, recent orders, revenue charts |
-| **Products** | Full CRUD, image gallery, categories, brands, stock, pricing, warranty, SEO fields |
-| **Categories** | Hierarchical category management with ordering |
-| **Brands** | Brand management with logos |
-| **Orders** | View, manage, update status, view order details |
-| **Customers** | Customer records with order history |
-| **Blog** | Create/edit/delete blog posts, categories, tags |
-| **Media Library** | Upload and manage images via Supabase Storage |
-| **SEO Settings** | Meta tags, sitemap configuration |
-| **Site Settings** | Company info, social media, hero content, business hours |
-| **Users** | Admin user management with role-based access |
-| **Screen Compatibility** | Manage phone screen compatibility database |
+| Section                  | Capabilities                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| **Dashboard**            | Overview stats, recent orders, revenue charts                                      |
+| **Products**             | Full CRUD, image gallery, categories, brands, stock, pricing, warranty, SEO fields |
+| **Categories**           | Hierarchical category management with ordering                                     |
+| **Brands**               | Brand management with logos                                                        |
+| **Orders**               | View, manage, update status, view order details                                    |
+| **Customers**            | Customer records with order history                                                |
+| **Blog**                 | Create/edit/delete blog posts, categories, tags                                    |
+| **Media Library**        | Upload and manage images via Supabase Storage                                      |
+| **SEO Settings**         | Meta tags, sitemap configuration                                                   |
+| **Site Settings**        | Company info, social media, hero content, business hours                           |
+| **Users**                | Admin user management with role-based access                                       |
+| **Screen Compatibility** | Manage phone screen compatibility database                                         |
 
 ### Content Management System (CMS)
 
 The CMS allows complete control over website content without code changes:
 
-| CMS Section | Manageable Content |
-|------------|-------------------|
-| **Homepage** | Hero banner, section titles, descriptions, CTA buttons, feature cards |
-| **Navigation** | Header menu, footer links, mobile menu with drag ordering |
-| **Footer** | Footer columns, quick links, newsletter section, contact info |
-| **Icons** | Browse Lucide library, upload custom SVG icons |
-| **Testimonials** | Customer reviews with ratings, featured status |
-| **FAQs** | Questions and answers organized by category |
+| CMS Section      | Manageable Content                                                    |
+| ---------------- | --------------------------------------------------------------------- |
+| **Homepage**     | Hero banner, section titles, descriptions, CTA buttons, feature cards |
+| **Navigation**   | Header menu, footer links, mobile menu with drag ordering             |
+| **Footer**       | Footer columns, quick links, newsletter section, contact info         |
+| **Icons**        | Browse Lucide library, upload custom SVG icons                        |
+| **Testimonials** | Customer reviews with ratings, featured status                        |
+| **FAQs**         | Questions and answers organized by category                           |
 
 ---
 
@@ -119,7 +119,7 @@ mekfidel/
 │   ├── app/
 │   │   ├── (auth)/              # Auth group routes
 │   │   │   ├── login/           # Login page
-│   │   │   └── register/       # Registration page
+│   │   │   └── reset-password/ # Password recovery
 │   │   ├── admin/               # Admin dashboard (CMS + E-commerce)
 │   │   │   ├── dashboard/       # Admin overview
 │   │   │   ├── products/        # Product management
@@ -225,7 +225,7 @@ mekfidel/
 
 ### Prerequisites
 
-- Node.js 18+ (recommended: 20.x)
+- Node.js 22+ (deployment: 24.x)
 - npm, yarn, or pnpm
 - A Supabase account ([Sign up free](https://supabase.com))
 
@@ -270,10 +270,12 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Create Admin User
 
-1. Visit `/auth/login` and register a new account
+1. Create a team account using Supabase Auth, then sign in at `/auth/login`
 2. In Supabase SQL Editor, execute:
    ```sql
-   UPDATE profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+   INSERT INTO profiles (id, email, role)
+   SELECT id, email, 'admin' FROM auth.users WHERE email = 'your-email@example.com'
+   ON CONFLICT (id) DO UPDATE SET role = 'admin';
    ```
 3. Refresh and access `/admin`
 
@@ -297,52 +299,52 @@ For incremental updates, use `sql/cms_migration.sql` which adds only the CMS tab
 
 #### E-commerce Tables
 
-| Table | Description |
-|-------|-------------|
-| `products` | Product catalog with pricing, stock, images, specifications |
-| `categories` | Hierarchical product categories |
-| `brands` | Phone brands with logos |
-| `orders` | Customer orders with status tracking |
-| `order_items` | Individual items in orders |
-| `customers` | Customer records |
-| `screen_compatibility` | Phone screen compatibility database |
+| Table                  | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| `products`             | Product catalog with pricing, stock, images, specifications |
+| `categories`           | Hierarchical product categories                             |
+| `brands`               | Phone brands with logos                                     |
+| `orders`               | Customer orders with status tracking                        |
+| `order_items`          | Individual items in orders                                  |
+| `customers`            | Customer records                                            |
+| `screen_compatibility` | Phone screen compatibility database                         |
 
 #### CMS Tables 🔥
 
-| Table | Description |
-|-------|-------------|
+| Table               | Description                                            |
+| ------------------- | ------------------------------------------------------ |
 | `homepage_sections` | Homepage content sections (hero, features, CTA, stats) |
-| `feature_cards` | Individual feature cards with icons |
-| `statistics` | Counter/statistic values with icons |
-| `navigation_items` | Header, footer, and mobile navigation |
-| `footer_sections` | Footer column content and links |
-| `social_links` | Social media platform links |
-| `uploaded_icons` | Custom SVG icon uploads |
-| `content_blocks` | Reusable content snippets |
-| `company_info` | Company information entries |
-| `testimonials` | Customer testimonials with ratings |
-| `faqs` | FAQ questions and answers |
+| `feature_cards`     | Individual feature cards with icons                    |
+| `statistics`        | Counter/statistic values with icons                    |
+| `navigation_items`  | Header, footer, and mobile navigation                  |
+| `footer_sections`   | Footer column content and links                        |
+| `social_links`      | Social media platform links                            |
+| `uploaded_icons`    | Custom SVG icon uploads                                |
+| `content_blocks`    | Reusable content snippets                              |
+| `company_info`      | Company information entries                            |
+| `testimonials`      | Customer testimonials with ratings                     |
+| `faqs`              | FAQ questions and answers                              |
 
 #### Supporting Tables
 
-| Table | Description |
-|-------|-------------|
-| `settings` | Site-wide configuration |
-| `profiles` | User profiles with roles |
-| `blog_posts` | Blog articles |
-| `media` | Media library tracking |
+| Table        | Description              |
+| ------------ | ------------------------ |
+| `settings`   | Site-wide configuration  |
+| `profiles`   | User profiles with roles |
+| `blog_posts` | Blog articles            |
+| `media`      | Media library tracking   |
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (admin only) |
-| `NEXT_PUBLIC_SITE_URL` | No | Production site URL for SEO |
-| `NEXT_PUBLIC_GA_ID` | No | Google Analytics ID |
+| Variable                        | Required | Description                            |
+| ------------------------------- | -------- | -------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase project URL                   |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase anonymous key                 |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Supabase service role key (admin only) |
+| `NEXT_PUBLIC_SITE_URL`          | No       | Production site URL for SEO            |
+| `NEXT_PUBLIC_GA_ID`             | No       | Google Analytics ID                    |
 
 ---
 
@@ -370,14 +372,14 @@ npm start
 ### Docker
 
 ```dockerfile
-FROM node:18-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine
+FROM node:24-alpine
 WORKDIR /app
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static .next/static
@@ -395,12 +397,14 @@ The admin dashboard provides complete control over the e-commerce and CMS featur
 ### Navigation
 
 The sidebar features:
+
 - **Desktop**: Fixed sidebar on the left
 - **Mobile**: Hamburger menu with slide-out drawer
 
 ### Dashboard Sections
 
 #### E-commerce Management
+
 - **Products** (`/admin/products`) — Full product CRUD with images, variants, SEO
 - **Categories** (`/admin/categories`) — Category hierarchy management
 - **Brands** (`/admin/brands`) — Brand management
@@ -408,6 +412,7 @@ The sidebar features:
 - **Customers** (`/admin/customers`) — Customer records
 
 #### Content Management 🔥
+
 - **Homepage** (`/admin/homepage`) — Hero, features, stats, CTA sections
 - **Navigation** (`/admin/navigation`) — Header/footer/mobile menu management
 - **Footer** (`/admin/footer`) — Footer content and social links
@@ -416,10 +421,12 @@ The sidebar features:
 - **FAQs** (`/admin/faqs`) — FAQ management with categories
 
 #### Blog & Media
+
 - **Blog** (`/admin/blog`) — Article creation and management
 - **Media** (`/admin/media`) — Image upload and management
 
 #### Settings
+
 - **Settings** (`/admin/settings`) — Company info, social links
 - **SEO** (`/admin/seo`) — Meta tags, keywords
 - **Users** (`/admin/users`) — Admin user management
@@ -433,6 +440,7 @@ The CMS enables non-technical users to manage all website content.
 ### Homepage Management
 
 Manage all homepage sections:
+
 - **Hero Banner** — Title, subtitle, description, button
 - **Feature Grid** — Section title, subtitle
 - **Feature Cards** — Icon, title, description, color (CRUD)
@@ -482,26 +490,26 @@ Manage all homepage sections:
 
 ### E-commerce APIs
 
-| Endpoint | Methods | Description |
-|----------|---------|-------------|
-| `/api/orders` | GET, POST | Order operations |
-| `/api/contact` | POST | Contact form submission |
-| `/api/newsletter` | POST | Newsletter subscription |
-| `/api/search` | GET | Product search |
-| `/api/upload` | POST | File upload to Supabase Storage |
+| Endpoint          | Methods   | Description                     |
+| ----------------- | --------- | ------------------------------- |
+| `/api/orders`     | GET, POST | Order operations                |
+| `/api/contact`    | POST      | Contact form submission         |
+| `/api/newsletter` | POST      | Newsletter subscription         |
+| `/api/search`     | GET       | Product search                  |
+| `/api/upload`     | POST      | File upload to Supabase Storage |
 
 ### CMS APIs 🔥
 
-| Endpoint | Methods | Description |
-|----------|---------|-------------|
-| `/api/homepage-sections` | GET, POST | Homepage sections CRUD |
-| `/api/feature-cards` | GET, POST, PATCH, DELETE | Feature cards CRUD |
-| `/api/statistics` | GET, POST, PATCH, DELETE | Statistics CRUD |
-| `/api/navigation` | GET, POST, PATCH, DELETE | Navigation CRUD |
-| `/api/footer` | GET, POST, PATCH, DELETE | Footer sections CRUD |
-| `/api/social-links` | GET, POST, PATCH, DELETE | Social links CRUD |
-| `/api/icons` | GET, POST, DELETE | Icon management |
-| `/api/company-info` | GET, POST, PATCH, DELETE | Company info CRUD |
+| Endpoint                 | Methods                  | Description            |
+| ------------------------ | ------------------------ | ---------------------- |
+| `/api/homepage-sections` | GET, POST                | Homepage sections CRUD |
+| `/api/feature-cards`     | GET, POST, PATCH, DELETE | Feature cards CRUD     |
+| `/api/statistics`        | GET, POST, PATCH, DELETE | Statistics CRUD        |
+| `/api/navigation`        | GET, POST, PATCH, DELETE | Navigation CRUD        |
+| `/api/footer`            | GET, POST, PATCH, DELETE | Footer sections CRUD   |
+| `/api/social-links`      | GET, POST, PATCH, DELETE | Social links CRUD      |
+| `/api/icons`             | GET, POST, DELETE        | Icon management        |
+| `/api/company-info`      | GET, POST, PATCH, DELETE | Company info CRUD      |
 
 ---
 
@@ -511,12 +519,12 @@ The icon system supports multiple icon libraries and custom uploads.
 
 ### Supported Libraries
 
-| Library | Icon Count | Usage |
-|---------|------------|-------|
-| Lucide React | 1000+ | Default, built-in |
-| Heroicons | Available | Requires setup |
-| Tabler | Available | Requires setup |
-| Custom SVG | Unlimited | Upload via admin |
+| Library      | Icon Count | Usage             |
+| ------------ | ---------- | ----------------- |
+| Lucide React | 1000+      | Default, built-in |
+| Heroicons    | Available  | Requires setup    |
+| Tabler       | Available  | Requires setup    |
+| Custom SVG   | Unlimited  | Upload via admin  |
 
 ### Usage in Code
 
@@ -527,10 +535,10 @@ import { SimpleIcon } from '@/components/ui/icon-renderer';
 
 // Multi-library icon
 import { IconRenderer } from '@/components/ui/icon-renderer';
-<IconRenderer 
-  library="lucide" 
-  iconName="Shield" 
-  size={24} 
+<IconRenderer
+  library="lucide"
+  iconName="Shield"
+  size={24}
 />
 ```
 
@@ -549,28 +557,31 @@ Icons are stored by name only (no React components):
 
 ## Admin Roles & Permissions
 
-| Role | Dashboard | Products | Orders | Blog | CMS | Settings | Users |
-|------|-----------|----------|--------|------|-----|---------|-------|
-| `admin` | ✓ Full | ✓ Full | ✓ Full | ✓ Full | ✓ Full | ✓ Full | ✓ Full |
-| `editor` | ✓ View | ✓ CRUD | ✓ View | ✓ CRUD | ✓ Edit | ✗ | ✗ |
-| `viewer` | ✓ View | ✓ View | ✓ View | ✓ View | ✗ | ✗ | ✗ |
+| Role     | Dashboard | Products | Orders | Blog   | CMS    | Settings | Users  |
+| -------- | --------- | -------- | ------ | ------ | ------ | -------- | ------ |
+| `admin`  | ✓ Full    | ✓ Full   | ✓ Full | ✓ Full | ✓ Full | ✓ Full   | ✓ Full |
+| `editor` | ✗         | ✗        | ✗      | ✓ CRUD | ✓ Edit | ✗        | ✗      |
+| `viewer` | ✗         | ✗        | ✗      | ✗      | ✗      | ✗        | ✗      |
 
 ---
 
 ## Security
 
 ### Database Security
+
 - **Row Level Security (RLS)** — Enabled on all tables
 - **Policy-based Access** — Public read, authenticated write for content
 - **Admin-only Operations** — Service role key for privileged operations
 
 ### Application Security
+
 - Security headers configured in middleware
 - Form validation with Zod
 - SQL injection prevention via parameterized queries
 - XSS protection via React's default escaping
 
 ### Storage Security
+
 - Public read for display images
 - Admin-only write access
 - File type restrictions by bucket
@@ -579,13 +590,13 @@ Icons are stored by name only (no React components):
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| `README.md` | This file |
-| `CHANGELOG.md` | Version history and changes |
-| `CMS_SETUP.md` | CMS configuration and usage guide |
-| `DEPLOYMENT_GUIDE.md` | Deployment instructions |
-| `supabase_sql_editor.sql` | Complete database SQL |
+| Document                  | Description                       |
+| ------------------------- | --------------------------------- |
+| `README.md`               | This file                         |
+| `CHANGELOG.md`            | Version history and changes       |
+| `CMS_SETUP.md`            | CMS configuration and usage guide |
+| `DEPLOYMENT_GUIDE.md`     | Deployment instructions           |
+| `supabase_sql_editor.sql` | Complete database SQL             |
 
 ---
 
@@ -598,3 +609,17 @@ This is a private project for Mekfidel Communication Ltd. All rights reserved.
 ## License
 
 Private — All rights reserved. Mekfidel Communication Ltd.
+
+## Audit remediation setup (October 2026)
+
+After the base schema and CMS tables, apply `sql/ai_cms_assistant.sql`, then the SQL in `supabase/migrations/20261008075452_transactional_admin_orders.sql`. This migration adds atomic checkout, inventory reservations, lifecycle protection, request limits, private newsletter subscriptions and transactional manual/AI change history. Browser writes are disabled; use the admin API. Existing orders are not retroactively reserved.
+
+Configure `SUPABASE_SERVICE_ROLE_KEY` on the server. For the assistant, configure `GROQ_API_KEY` and/or `GEMINI_API_KEY`. Optional models are `GROQ_MODEL` (default `openai/gpt-oss-20b`) and `GEMINI_MODEL` (default `gemini-3.1-flash-lite`). Automatic mode tries Groq then Gemini. Provider free quotas and availability depend on the account; exhaustion displays an error and leaves manual controls usable. Never put these keys in a `NEXT_PUBLIC_` variable.
+
+The assistant previews supported content and commerce changes before applying them. Authentication credentials, deployment settings, payment credentials and file bytes are outside its action engine. Upload files manually; the assistant can edit registered media metadata. Undo checks for conflicting changes. Order transitions cannot be undone from history.
+
+Create the first user in Supabase Auth, then assign its existing UUID an admin profile through the Supabase dashboard. Public registration does not grant admin access. Editors manage website content; only admins manage commerce, business settings and team roles.
+
+Run `npm run lint -- --max-warnings 0`, `npm run typecheck`, `npm test` and `npm run build`. CI runs lint, types, tests and the production dependency audit without deployment credentials. Vercel performs the preview build. See `docs/AUDIT-REMEDIATION.md` for verified changes and remaining business decisions.
+
+Checkout submits an order request. Payment and delivery charges are confirmed with the shop; it does not collect a card payment. The former placeholder notification integration has been removed. No outbound order notification service is configured.

@@ -1,25 +1,27 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 const protectedApiPrefixes = [
-  '/api/ai-cms',
-  '/api/company-info',
-  '/api/feature-cards',
-  '/api/footer',
-  '/api/homepage-sections',
-  '/api/icons',
-  '/api/navigation',
-  '/api/services',
-  '/api/social-links',
-  '/api/statistics',
-  '/api/upload',
+  "/api/ai-cms",
+  "/api/company-info",
+  "/api/feature-cards",
+  "/api/footer",
+  "/api/homepage-sections",
+  "/api/icons",
+  "/api/navigation",
+  "/api/services",
+  "/api/social-links",
+  "/api/statistics",
+  "/api/upload",
 ];
 
 export async function proxy(request: NextRequest) {
-  const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
+  const isAdminPage = request.nextUrl.pathname.startsWith("/admin");
   const isProtectedApiMutation =
-    request.method !== 'GET' &&
-    protectedApiPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix));
+    request.method !== "GET" &&
+    protectedApiPrefixes.some((prefix) =>
+      request.nextUrl.pathname.startsWith(prefix),
+    );
 
   if (!isAdminPage && !isProtectedApiMutation) {
     return NextResponse.next();
@@ -31,48 +33,83 @@ export async function proxy(request: NextRequest) {
 
   if (!url || !key) {
     return isAdminPage
-      ? NextResponse.redirect(new URL('/auth/login', request.url))
-      : NextResponse.json({ error: 'Authentication is not configured' }, { status: 503 });
+      ? NextResponse.redirect(new URL("/auth/login", request.url))
+      : NextResponse.json(
+          { error: "Authentication is not configured" },
+          { status: 503 },
+        );
   }
 
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll: cookiesToSet => {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value),
+        );
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
+          response.cookies.set(name, value, options),
         );
       },
     },
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   let authorized = false;
+  let role: string | undefined;
 
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
       .single();
-    authorized = profile?.role === 'admin' || profile?.role === 'editor';
+    role = profile?.role;
+    authorized = profile?.role === "admin" || profile?.role === "editor";
   }
 
   if (!authorized) {
     if (isProtectedApiMutation) {
-      return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 });
+      return NextResponse.json(
+        { error: user ? "Forbidden" : "Unauthorized" },
+        { status: user ? 403 : 401 },
+      );
     }
 
-    const loginUrl = new URL('/auth/login', request.url);
-    loginUrl.searchParams.set('next', request.nextUrl.pathname);
+    const loginUrl = new URL("/auth/login", request.url);
+    loginUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  if (
+    isAdminPage &&
+    role === "editor" &&
+    ![
+      "homepage",
+      "navigation",
+      "footer",
+      "services",
+      "blog",
+      "testimonials",
+      "faqs",
+      "media",
+      "icons",
+      "history",
+      "content",
+    ].includes(request.nextUrl.pathname.split("/")[2])
+  ) {
+    const redirect = NextResponse.redirect(
+      new URL("/admin/homepage", request.url),
+    );
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  }
   return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/:path*'],
+  matcher: ["/admin/:path*", "/api/:path*"],
 };

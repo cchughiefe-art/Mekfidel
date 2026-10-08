@@ -1,24 +1,28 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { getServiceIcon } from '@/lib/utils/icon-mapper';
-import { Spinner } from '@/components/ui/spinner';
-import type { Service } from '@/types';
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
+import { getServiceIcon } from "@/lib/utils/icon-mapper";
+import { Spinner } from "@/components/ui/spinner";
+import type { Service } from "@/types";
 
-export function ServicesOverview() {
+export function ServicesOverview({
+  title,
+  subtitle,
+}: { title?: string; subtitle?: string } = {}) {
   const supabase = createClient();
 
   const { data: services, isLoading } = useQuery({
-    queryKey: ['home-services'],
+    queryKey: ["home-services"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('services')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_index', { ascending: true });
+      const { data, error: queryError1 } = await supabase
+        .from("services")
+        .select("*")
+        .eq("is_active", true)
+        .order("order_index", { ascending: true });
+      if (queryError1) throw queryError1;
       return (data || []) as Service[];
     },
     staleTime: 5 * 60 * 1000,
@@ -28,14 +32,16 @@ export function ServicesOverview() {
     <section className="section-padding bg-gradient-to-b from-gray-50 to-white">
       <div className="container-custom">
         <div className="text-center mb-16">
-          <h2 className="section-title">Our Services</h2>
+          <h2 className="section-title">{title || "Our Services"}</h2>
           <p className="section-subtitle mx-auto">
-            Comprehensive mobile solutions tailored to meet all your phone needs.
+            {subtitle || "Parts, tools and compatibility guidance."}
           </p>
         </div>
 
         {isLoading ? (
-          <div className="py-20"><Spinner /></div>
+          <div className="py-20">
+            <Spinner />
+          </div>
         ) : !services?.length ? (
           <div className="text-center py-16 text-gray-400">
             <p>Services coming soon.</p>
@@ -49,12 +55,18 @@ export function ServicesOverview() {
                   key={service.id}
                   className="card p-6 card-hover flex items-start gap-5"
                 >
-                  <div className={`w-14 h-14 rounded-2xl ${service.color} flex items-center justify-center flex-shrink-0`}>
+                  <div
+                    className={`w-14 h-14 rounded-2xl ${service.color} flex items-center justify-center flex-shrink-0`}
+                  >
                     <Icon className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">{service.description}</p>
+                    <h3 className="font-bold text-gray-900 mb-2">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">
+                      {service.description}
+                    </p>
                   </div>
                 </div>
               );
@@ -75,4 +87,3 @@ export function ServicesOverview() {
     </section>
   );
 }
-

@@ -14,7 +14,7 @@ export interface Product {
   stock: number;
   sku: string;
   warranty: string;
-  availability: 'in_stock' | 'out_of_stock' | 'pre_order';
+  availability: "in_stock" | "out_of_stock" | "pre_order";
   images: string[];
   is_featured: boolean;
   is_active: boolean;
@@ -74,7 +74,8 @@ export interface OrderItem {
   product?: Product;
 }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'ready' | 'delivered' | 'cancelled';
+export type OrderStatus =
+  "pending" | "confirmed" | "processing" | "ready" | "delivered" | "cancelled";
 
 export interface Customer {
   id: string;
@@ -213,7 +214,7 @@ export interface UserProfile {
   email: string;
   full_name: string;
   avatar_url?: string;
-  role: 'admin' | 'editor' | 'viewer';
+  role: "admin" | "editor" | "viewer";
   created_at: string;
 }
 
@@ -226,7 +227,15 @@ export interface HomepageSection {
   created_at: string;
   updated_at: string;
   section_key: string;
-  section_type: 'hero' | 'features_grid' | 'stats' | 'cta' | 'testimonials' | 'steps' | 'promo' | 'custom';
+  section_type:
+    | "hero"
+    | "features_grid"
+    | "stats"
+    | "cta"
+    | "testimonials"
+    | "steps"
+    | "promo"
+    | "custom";
   title?: string;
   subtitle?: string;
   description?: string;
@@ -250,7 +259,7 @@ export interface FeatureCard {
   section_id: string;
   title: string;
   description?: string;
-  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name: string;
   icon_color?: string;
   url?: string;
@@ -259,20 +268,22 @@ export interface FeatureCard {
 }
 
 export interface Statistic {
+  is_verified?: boolean;
   id: string;
   created_at: string;
   updated_at: string;
-  context: 'homepage' | 'about' | 'footer' | string;
+  context: "homepage" | "about" | "footer" | string;
   label: string;
   value: string;
   suffix?: string;
-  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library?: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name?: string;
   sort_order: number;
   is_active: boolean;
 }
 
-export type NavigationLocation = 'header' | 'footer_main' | 'footer_quick' | 'footer_categories' | 'mobile';
+export type NavigationLocation =
+  "header" | "footer_main" | "footer_quick" | "footer_categories" | "mobile";
 
 export interface NavigationItem {
   id: string;
@@ -281,7 +292,7 @@ export interface NavigationItem {
   location: NavigationLocation;
   label: string;
   url: string;
-  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library?: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name?: string;
   parent_id?: string;
   sort_order: number;
@@ -297,7 +308,7 @@ export interface FooterSection {
   section_key: string;
   title?: string;
   content?: string;
-  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library?: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name?: string;
   links: FooterLink[];
   sort_order: number;
@@ -316,7 +327,7 @@ export interface SocialLink {
   updated_at: string;
   platform: string;
   label: string;
-  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name?: string;
   url?: string;
   is_visible: boolean;
@@ -340,7 +351,7 @@ export interface ContentBlock {
   created_at: string;
   updated_at: string;
   block_key: string;
-  block_type: 'text' | 'html' | 'markdown' | 'component';
+  block_type: "text" | "html" | "markdown" | "component";
   title?: string;
   content: string;
   page?: string;
@@ -354,11 +365,11 @@ export interface CompanyInfo {
   created_at: string;
   updated_at: string;
   info_key: string;
-  info_type: 'text' | 'html' | 'number' | 'date';
+  info_type: "text" | "html" | "number" | "date";
   title?: string;
   content: string;
   image?: string;
-  icon_library?: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library?: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name?: string;
   sort_order: number;
   is_active: boolean;
@@ -368,7 +379,7 @@ export interface AboutValue {
   id: string;
   title: string;
   description: string;
-  icon_library: 'lucide' | 'heroicons' | 'tabler' | 'uploaded';
+  icon_library: "lucide" | "heroicons" | "tabler" | "uploaded";
   icon_name: string;
   icon_color?: string;
 }
@@ -401,5 +412,3 @@ export interface FAQ {
   is_published: boolean;
   sort_order: number;
 }
-
-

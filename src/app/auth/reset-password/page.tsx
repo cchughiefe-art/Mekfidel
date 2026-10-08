@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Smartphone, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Smartphone, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error("Passwords do not match");
       return;
     }
     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error("Password must be at least 8 characters");
       return;
     }
 
@@ -31,10 +31,13 @@ export default function ResetPasswordPage() {
       const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast.success('Password updated successfully');
-      router.push('/auth/login');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reset password');
+      toast.success("Password updated successfully");
+      router.push("/auth/login");
+    } catch (error) {
+      toast.error(
+        (error instanceof Error ? error.message : undefined) ||
+          "Failed to reset password",
+      );
     } finally {
       setLoading(false);
     }
@@ -56,10 +59,10 @@ export default function ResetPasswordPage() {
             <div className="relative">
               <Input
                 label="New Password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Min. 8 characters"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
               />
@@ -68,7 +71,11 @@ export default function ResetPasswordPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             <Input
@@ -76,10 +83,16 @@ export default function ResetPasswordPage() {
               type="password"
               placeholder="Repeat your password"
               value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <Button variant="primary" className="w-full" size="lg" type="submit" loading={loading}>
+            <Button
+              variant="primary"
+              className="w-full"
+              size="lg"
+              type="submit"
+              loading={loading}
+            >
               Update Password
             </Button>
           </form>
@@ -88,4 +101,3 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
-

@@ -1,22 +1,22 @@
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mekfidelcomms.com';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://mekfidel.vercel.app";
 
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/auth/'],
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/admin/", "/api/", "/auth/"],
       },
       {
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/auth/'],
+        userAgent: "Googlebot",
+        allow: "/",
+        disallow: ["/admin/", "/api/", "/auth/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
-

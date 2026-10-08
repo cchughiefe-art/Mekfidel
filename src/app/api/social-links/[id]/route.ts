@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/service';
+import { manualAction, adminError } from "@/lib/ai-cms/manual";
+import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -11,61 +12,39 @@ export async function GET(request: Request, { params }: Params) {
     const { id } = await params;
     const supabase = createServiceClient();
     const { data, error } = await supabase
-      .from('social_links')
-      .select('*')
-      .eq('id', id)
-      .eq('is_visible', true)
+      .from("social_links")
+      .select("*")
+      .eq("id", id)
+      .eq("is_visible", true)
       .single();
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Request failed" },
+      { status: 500 },
+    );
   }
 }
 
-// PUT - Update a social link
 export async function PUT(request: Request, { params }: Params) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const supabase = createServiceClient();
-
-    const { data, error } = await supabase
-      .from('social_links')
-      .update({
-        platform: body.platform,
-        label: body.label,
-        icon_library: body.icon_library,
-        icon_name: body.icon_name,
-        url: body.url,
-        is_visible: body.is_visible,
-        sort_order: body.sort_order,
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      await manualAction("social_links", "update", await request.json(), id),
+    );
+  } catch (error) {
+    return adminError(error);
   }
 }
-
-// DELETE - Delete a social link
 export async function DELETE(request: Request, { params }: Params) {
   try {
     const { id } = await params;
-    const supabase = createServiceClient();
-    const { error } = await supabase
-      .from('social_links')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      await manualAction("social_links", "delete", {}, id),
+    );
+  } catch (error) {
+    return adminError(error);
   }
 }

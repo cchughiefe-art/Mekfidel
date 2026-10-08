@@ -1,46 +1,34 @@
-import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/service';
+import { manualAction, adminError } from "@/lib/ai-cms/manual";
+import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 // GET - Fetch all social links
 export async function GET() {
   try {
     const supabase = createServiceClient();
     const { data, error } = await supabase
-      .from('social_links')
-      .select('*')
-      .eq('is_visible', true)
-      .order('sort_order', { ascending: true });
+      .from("social_links")
+      .select("*")
+      .eq("is_visible", true)
+      .order("sort_order", { ascending: true });
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Request failed" },
+      { status: 500 },
+    );
   }
 }
 
-// POST - Create a new social link
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const supabase = createServiceClient();
-
-    const { data, error } = await supabase
-      .from('social_links')
-      .insert({
-        platform: body.platform,
-        label: body.label,
-        icon_library: body.icon_library ?? 'lucide',
-        icon_name: body.icon_name,
-        url: body.url,
-        is_visible: body.is_visible ?? true,
-        sort_order: body.sort_order ?? 0,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return NextResponse.json(data, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      await manualAction("social_links", "create", await request.json()),
+      { status: 201 },
+    );
+  } catch (error) {
+    return adminError(error);
   }
 }

@@ -1,10 +1,21 @@
-export default function ReturnPolicyPage() {
+import Link from "next/link";
+import { publicClient } from "@/lib/supabase/public";
+export default async function ReturnPolicyPage() {
+  const { data: settings, error } = await publicClient()
+    .from("settings")
+    .select("phone,email,whatsapp")
+    .single();
+  if (error) throw new Error("Contact information could not be loaded");
   return (
     <div className="min-h-screen">
       <section className="gradient-hero py-20 md:py-32">
         <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Return Policy</h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">Last updated: January 2024</p>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Return Policy
+          </h1>
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+            Contact the shop for policy enquiries
+          </p>
         </div>
       </section>
 
@@ -12,21 +23,25 @@ export default function ReturnPolicyPage() {
         <div className="container-custom max-w-3xl prose prose-lg prose-gray">
           <h2>Return Policy Overview</h2>
           <p>
-            At Mekfidel Communication Ltd, we strive to ensure your satisfaction with every purchase. 
-            If you are not completely satisfied, we are here to help.
+            At Mekfidel Communication Ltd, we strive to ensure your satisfaction
+            with every purchase. If you are not completely satisfied, we are
+            here to help.
           </p>
 
           <h2>Return Period</h2>
           <p>
-            You have <strong>7 days</strong> from the date of delivery to request a return for most products. 
-            Items must be unused and in the same condition as received.
+            You have <strong>7 days</strong> from the date of delivery to
+            request a return for most products. Items must be unused and in the
+            same condition as received.
           </p>
 
           <h2>Eligibility for Returns</h2>
           <p>To be eligible for a return, items must:</p>
           <ul>
             <li>Be unused and in original condition</li>
-            <li>Include all original packaging, accessories, and documentation</li>
+            <li>
+              Include all original packaging, accessories, and documentation
+            </li>
             <li>Have proof of purchase (receipt or order number)</li>
             <li>Not be damaged due to misuse or mishandling</li>
           </ul>
@@ -52,34 +67,37 @@ export default function ReturnPolicyPage() {
 
           <h2>Refunds</h2>
           <p>
-            Approved refunds will be processed within 5-10 business days. Refunds will be issued to the 
-            original payment method. Shipping costs are non-refundable.
+            Approved refunds will be processed within 5-10 business days.
+            Refunds will be issued to the original payment method. Shipping
+            costs are non-refundable.
           </p>
 
           <h2>Exchanges</h2>
           <p>
-            For defective or incorrect items, we offer exchanges. Contact us within 7 days of delivery 
-            to arrange an exchange.
+            For defective or incorrect items, we offer exchanges. Contact us
+            within 7 days of delivery to arrange an exchange.
           </p>
 
           <h2>Warranty Claims</h2>
           <p>
-            Products under warranty will be repaired or replaced according to the warranty terms. 
-            Please contact us to initiate a warranty claim.
+            Products under warranty will be repaired or replaced according to
+            the warranty terms. Please contact us to initiate a warranty claim.
           </p>
 
           <h2>Contact for Returns</h2>
-          <p>
-            To initiate a return, please contact us:
-          </p>
+          <p>To initiate a return, please contact us:</p>
           <ul>
-            <li>Email: info@mekfidelcomms.com</li>
-            <li>Phone: +234 800 000 0000</li>
-            <li>WhatsApp: +234 800 000 0000</li>
+            <li>Email: {settings?.email || "our contact page"}</li>
+            <li>Phone: {settings?.phone || "See contact page"}</li>
+            <li>WhatsApp: {settings?.whatsapp || "See contact page"}</li>
           </ul>
+          <p>
+            <Link href="/contact" className="text-blue-600 underline">
+              Contact Mekfidel
+            </Link>
+          </p>
         </div>
       </section>
     </div>
   );
 }
-

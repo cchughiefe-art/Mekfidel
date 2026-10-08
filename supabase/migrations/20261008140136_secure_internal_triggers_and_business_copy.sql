@@ -1,0 +1,3 @@
+revoke execute on function public.guard_last_admin(), public.guard_order_status(), public.sync_customer_totals() from public, anon, authenticated;
+update public.settings set seo_title='Mekfidel Communication Ltd — Repair Tools, Screens & Spare Parts' where seo_title='Mekfidel Communication Ltd - Mobile Phones, Accessories & Repair Services';
+update public.settings set seo_description='Phone repair tools, replacement screens and spare parts for technicians and resellers across Nigeria.' where seo_description='Your trusted partner for mobile phones, phone accessories, phone screens, spare parts, and professional phone repair services across Nigeria.';

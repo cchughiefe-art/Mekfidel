@@ -1,195 +1,249 @@
-'use client';
-
-import Link from 'next/link';
-import { Smartphone, Mail, Phone, MapPin, Clock, Globe } from 'lucide-react';
-import { useSettings } from '@/hooks/use-supabase-query';
-
+"use client";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useSettings } from "@/hooks/use-supabase-query";
+import { safeUrl } from "@/lib/utils/safe-content";
+type FooterSection = {
+  id: string;
+  section_key: string;
+  title: string;
+  content: string;
+  links: Array<{
+    label?: string;
+    name?: string;
+    url?: string;
+    href?: string;
+  }> | null;
+};
+type MenuLink = { id: string; label: string; url: string; location: string };
+type SocialLink = { id: string; label: string; platform: string; url: string };
 export function Footer() {
   const { data: settings } = useSettings();
-
-  const socialLinks = [
-    { icon: Globe, href: settings?.social_media?.facebook || '#', label: 'Globe' },
-    { icon: Globe, href: settings?.social_media?.instagram || '#', label: 'Globe' },
-    { icon: Globe, href: settings?.social_media?.twitter || '#', label: 'Globe' },
-    { icon: Globe, href: settings?.social_media?.linkedin || '#', label: 'LinkedIn' },
-    { icon: Globe, href: settings?.social_media?.youtube || '#', label: 'YouTube' },
-  ].filter(s => s.href && s.href !== '#');
-
+  const [feedback, setFeedback] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { data: sections = [] } = useQuery<FooterSection[]>({
+    queryKey: ["public-footer"],
+    queryFn: async () => {
+      const response = await fetch("/api/footer");
+      if (!response.ok) throw new Error("Footer could not be loaded");
+      return response.json();
+    },
+  });
+  const { data: social = [] } = useQuery<SocialLink[]>({
+    queryKey: ["public-social"],
+    queryFn: async () => {
+      const response = await fetch("/api/social-links");
+      if (!response.ok) throw new Error("Social links could not be loaded");
+      return response.json();
+    },
+  });
+  const { data: menus = [] } = useQuery<MenuLink[]>({
+    queryKey: ["public-footer-navigation"],
+    queryFn: async () => {
+      const response = await fetch("/api/navigation");
+      if (!response.ok) throw new Error("Footer links could not be loaded");
+      return response.json();
+    },
+  });
+  const newsletter = sections.find(
+    (section) => section.section_key === "newsletter",
+  );
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      {/* Newsletter */}
-      <div className="border-b border-gray-800">
-        <div className="container-custom py-12">
-          <div className="max-w-xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-white mb-2">Stay Updated</h3>
-            <p className="text-gray-400 mb-6">Subscribe to get the latest products and offers.</p>
+    <footer className="bg-slate-950 text-slate-300">
+      {newsletter && (
+        <section className="border-b border-slate-800">
+          <div className="container-custom max-w-2xl py-12 text-center">
+            <h2 className="text-2xl font-bold text-white">
+              {newsletter.title}
+            </h2>
+            <p className="my-4">
+              {newsletter.content || "Get updates about products and offers."}
+            </p>
             <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const email = new FormData(form).get('email');
+              className="flex flex-col gap-3 sm:flex-row"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                const form = event.currentTarget;
+                setSubmitting(true);
+                setFeedback("");
                 try {
-                  await fetch('/api/newsletter', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
+                  const response = await fetch("/api/newsletter", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      email: new FormData(form).get("email"),
+                      consent: true,
+                    }),
                   });
+                  const body = await response.json();
+                  if (!response.ok)
+                    throw new Error(body.error || "Could not subscribe");
+                  setFeedback("Subscription saved. Thank you!");
                   form.reset();
-                  alert('Subscribed successfully!');
-                } catch {
-                  alert('Subscription failed. Please try again.');
+                } catch (error) {
+                  setFeedback(
+                    error instanceof Error ? error.message : "Try again later.",
+                  );
+                } finally {
+                  setSubmitting(false);
                 }
               }}
-              className="flex gap-3"
             >
+              <label className="sr-only" htmlFor="newsletter-email">
+                Email address
+              </label>
               <input
+                id="newsletter-email"
+                required
                 type="email"
                 name="email"
-                placeholder="Enter your email"
-                required
-                className="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={254}
+                autoComplete="email"
+                placeholder="Your email address"
+                className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white"
               />
-              <button type="submit" className="btn-primary whitespace-nowrap">
-                Subscribe
+              <button
+                disabled={submitting}
+                type="submit"
+                className="btn-primary"
+              >
+                {submitting ? "Saving…" : "Subscribe"}
               </button>
             </form>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer */}
-      <div className="container-custom py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Company Info */}
-          <div className="space-y-5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Smartphone className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="text-lg font-bold text-white block leading-tight">
-                  {settings?.company_name?.split(' ')[0] || 'Mekfidel'}
-                </span>
-                <span className="text-[10px] text-gray-400 block leading-tight tracking-wider uppercase">
-                  {settings?.company_name?.split(' ').slice(1).join(' ') || 'Communication Ltd'}
-                </span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              {settings?.about_text
-                ? settings.about_text.slice(0, 200) + '...'
-                : 'Your trusted partner for mobile phones, accessories, repairs, and wholesale solutions across Nigeria.'}
+            <p className="mt-3 text-xs">
+              By subscribing, you agree to receive updates.{" "}
+              <Link href="/privacy" className="underline">
+                Privacy policy
+              </Link>
             </p>
-            <div className="flex gap-3">
-              {socialLinks.map(social => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-blue-600 transition-colors"
-                    aria-label={social.label}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                );
-              })}
-            </div>
+            <p role="status" className="mt-3 text-sm">
+              {feedback}
+            </p>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-semibold mb-5">Quick Links</h4>
-            <ul className="space-y-3">
-              {[
-                { name: 'Home', href: '/' },
-                { name: 'Products', href: '/products' },
-                { name: 'Services', href: '/services' },
-                { name: 'About Us', href: '/about' },
-                { name: 'Blog', href: '/blog' },
-                { name: 'Contact', href: '/contact' },
-                { name: 'FAQ', href: '/faq' },
-              ].map(link => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-blue-400 transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h4 className="text-white font-semibold mb-5">Categories</h4>
-            <ul className="space-y-3">
-              {[
-                'Mobile Phones',
-                'Phone Accessories',
-                'Phone Screens',
-                'Spare Parts',
-                'Phone Repair',
-              ].map(cat => (
-                <li key={cat}>
-                  <Link
-                    href={`/products?category=${encodeURIComponent(cat.toLowerCase())}`}
-                    className="text-sm hover:text-blue-400 transition-colors"
-                  >
-                    {cat}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-white font-semibold mb-5">Contact Us</h4>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">{settings?.address || 'Lagos, Nigeria'}</span>
-              </li>
-              <li>
-                <a href={`tel:${settings?.phone}`} className="flex items-center gap-3 hover:text-blue-400 transition-colors">
-                  <Phone className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span className="text-sm">{settings?.phone || '+234 800 000 0000'}</span>
-                </a>
-              </li>
-              <li>
-                <a href={`mailto:${settings?.email}`} className="flex items-center gap-3 hover:text-blue-400 transition-colors">
-                  <Mail className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span className="text-sm">{settings?.email || 'info@mekfidelcomms.com'}</span>
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">{settings?.business_hours || 'Mon - Sat: 8AM - 6PM'}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        </section>
+      )}
+      <div className="container-custom grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        {sections
+          .filter((section) => section.section_key !== "newsletter")
+          .map((section) => (
+            <section key={section.id}>
+              <h2 className="mb-4 font-bold text-white">{section.title}</h2>
+              {section.content && (
+                <p className="whitespace-pre-line text-sm leading-relaxed">
+                  {section.content}
+                </p>
+              )}
+              {section.section_key === "company" && (
+                <>
+                  <p className="text-sm leading-relaxed">
+                    {settings?.footer_text ||
+                      "Phone repair tools, replacement screens and spare parts."}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {social
+                      .filter((link) => /^https?:\/\//i.test(link.url))
+                      .map((link) => (
+                        <a
+                          key={link.id}
+                          href={safeUrl(link.url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm underline"
+                        >
+                          {link.label || link.platform}
+                        </a>
+                      ))}
+                  </div>
+                </>
+              )}
+              {section.section_key === "contact" && (
+                <address className="space-y-2 text-sm not-italic">
+                  <p>{settings?.address}</p>
+                  {settings?.phone && (
+                    <a
+                      className="block"
+                      href={
+                        "tel:" + String(settings.phone).replace(/[^+0-9]/g, "")
+                      }
+                    >
+                      {settings.phone}
+                    </a>
+                  )}
+                  {settings?.email && (
+                    <a
+                      className="block break-all"
+                      href={"mailto:" + settings.email}
+                    >
+                      {settings.email}
+                    </a>
+                  )}
+                  <p>{settings?.business_hours}</p>
+                </address>
+              )}
+              {menus.filter(
+                (item) =>
+                  item.location ===
+                  (
+                    {
+                      quick_links: "footer_quick",
+                      categories: "footer_categories",
+                      company: "footer_main",
+                    } as Record<string, string>
+                  )[section.section_key],
+              ).length > 0 && (
+                <ul className="mt-3 space-y-2">
+                  {menus
+                    .filter(
+                      (item) =>
+                        item.location ===
+                        (
+                          {
+                            quick_links: "footer_quick",
+                            categories: "footer_categories",
+                            company: "footer_main",
+                          } as Record<string, string>
+                        )[section.section_key],
+                    )
+                    .map((item) => (
+                      <li key={item.id}>
+                        <Link
+                          href={safeUrl(item.url)}
+                          className="text-sm hover:text-white"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              )}
+              {Array.isArray(section.links) && (
+                <ul className="mt-3 space-y-2">
+                  {section.links.map((link, index) => (
+                    <li key={index}>
+                      <Link
+                        href={safeUrl(link.url || link.href)}
+                        className="text-sm hover:text-white"
+                      >
+                        {link.label || link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
       </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="container-custom py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} {settings?.company_name || 'Mekfidel Communication Ltd'}. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="text-sm text-gray-500 hover:text-blue-400 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="text-sm text-gray-500 hover:text-blue-400 transition-colors">Terms of Service</Link>
-            <Link href="/return-policy" className="text-sm text-gray-500 hover:text-blue-400 transition-colors">Return Policy</Link>
-          </div>
-        </div>
+      <div className="container-custom flex flex-col gap-4 border-t border-slate-800 py-6 text-xs sm:flex-row sm:justify-between">
+        <p>
+          © {new Date().getFullYear()} {settings?.company_name || "Mekfidel"}
+        </p>
+        <nav aria-label="Policies" className="flex flex-wrap gap-5">
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/return-policy">Returns</Link>
+        </nav>
       </div>
     </footer>
   );
 }
-
