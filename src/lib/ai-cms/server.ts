@@ -127,7 +127,9 @@ export async function prepareActions(
         throw new Error(
           `${action.targetLabel} could not be found. Refresh and try again.`,
         );
-      return { ...action, changes, expected: data };
+      // Preserve the version the human actually edited; fetching it at save time
+      // would incorrectly bless stale form values as current.
+      return { ...action, changes, expected: action.original || data };
     }),
   );
 }

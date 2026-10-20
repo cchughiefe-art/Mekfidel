@@ -4,6 +4,7 @@ export async function saveAdminRecord(
   resource: CmsResource,
   changes: Record<string, unknown>,
   id?: string,
+  original?: Record<string, unknown>,
 ) {
   const response = await fetch("/api/admin/actions", {
     method: "POST",
@@ -12,6 +13,7 @@ export async function saveAdminRecord(
       resource,
       operation: id ? "update" : "create",
       targetId: id,
+      original,
       targetLabel: String(changes.name || changes.title || resource),
       changes,
     }),

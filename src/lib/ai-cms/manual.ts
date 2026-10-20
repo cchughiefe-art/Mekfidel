@@ -63,6 +63,7 @@ export async function manualAction(
   operation: "create" | "update" | "delete",
   changes: Record<string, unknown>,
   targetId?: string,
+  original?: Record<string, unknown>,
 ) {
   const request = await manualActions([
     {
@@ -70,6 +71,7 @@ export async function manualAction(
       operation,
       changes,
       targetId,
+      original,
       targetLabel: String(
         changes.name || changes.title || changes.label || resource,
       ).slice(0, 200),

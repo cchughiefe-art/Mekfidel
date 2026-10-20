@@ -1,21 +1,11 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
+import { readJson, BodyTooLargeError } from "@/lib/utils/request-body";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { createOrderSchema } from "@/lib/utils/validators";
 export async function POST(request: Request) {
   try {
-    if (Number(request.headers.get("content-length") || 0) > 30000)
-      return NextResponse.json(
-        { error: "Order is too large" },
-        { status: 413 },
-      );
-    const text = await request.text();
-    if (text.length > 30000)
-      return NextResponse.json(
-        { error: "Order is too large" },
-        { status: 413 },
-      );
-    const parsed = createOrderSchema.safeParse(JSON.parse(text));
+    const parsed = createOrderSchema.safeParse(await readJson(request));
     if (!parsed.success)
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message || "Invalid order" },
@@ -57,6 +47,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     return NextResponse.json({ success: true, order });
   } catch (error) {
+    if (error instanceof BodyTooLargeError)
+      return NextResponse.json(
+        { error: "Order is too large" },
+        { status: 413 },
+      );
     if (error instanceof SyntaxError)
       return NextResponse.json(
         { error: "Invalid order JSON" },

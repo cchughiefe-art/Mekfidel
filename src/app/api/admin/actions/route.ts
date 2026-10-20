@@ -19,6 +19,7 @@ export async function POST(request: Request) {
         action.operation,
         action.changes,
         action.targetId,
+        action.original,
       ),
     );
   } catch (error) {

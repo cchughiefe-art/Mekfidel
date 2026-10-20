@@ -20,4 +20,5 @@ jobs:
       - run: npm run lint -- --max-warnings 0
       - run: npm run typecheck
       - run: npm test
+      - run: npm run build
       - run: npm audit --omit=dev --audit-level=high

@@ -51,6 +51,20 @@ export function Footer() {
   );
   return (
     <footer className="bg-slate-950 text-slate-300">
+      <div className="container-custom flex flex-col justify-between gap-6 border-b border-white/10 py-12 sm:flex-row sm:items-center">
+        <div>
+          <p className="eyebrow text-lime-300">YOUR NEXT REPAIR STARTS HERE</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+            Let’s find the right part.
+          </h2>
+        </div>
+        <Link
+          href="/contact"
+          className="inline-flex w-fit items-center gap-6 rounded-xl bg-lime-300 px-6 py-3 text-sm font-bold text-slate-950"
+        >
+          Talk to our team <span aria-hidden="true">↗</span>
+        </Link>
+      </div>
       {newsletter && (
         <section className="border-b border-slate-800">
           <div className="container-custom max-w-2xl py-12 text-center">

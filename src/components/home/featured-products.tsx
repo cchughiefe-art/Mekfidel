@@ -52,11 +52,14 @@ export function FeaturedProducts({
   return (
     <section className="section-padding bg-gray-50">
       <div className="container-custom">
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <h2 className="section-title">{title || "Featured Products"}</h2>
+            <h2 className="section-title">
+              {title || "Selected for your workbench"}
+            </h2>
             <p className="section-subtitle">
-              {subtitle || "Explore selected parts and tools."}
+              {subtitle ||
+                "A closer look at the parts and tools in our catalogue."}
             </p>
           </div>
           <Link
@@ -85,7 +88,7 @@ export function FeaturedProducts({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {products.map((product) => (
               <ProductCard
                 key={product.id}

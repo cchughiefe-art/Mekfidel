@@ -62,9 +62,11 @@ export function ProductCategories({
   return (
     <section className="section-padding">
       <div className="container-custom">
-        <div className="text-center mb-16">
-          <h2 className="section-title">{title || "Shop by Category"}</h2>
-          <p className="section-subtitle mx-auto">
+        <div className="mb-8 flex flex-col items-start">
+          <h2 className="section-title">
+            {title || "Start with what you need"}
+          </h2>
+          <p className="section-subtitle">
             {subtitle ||
               "Find repair tools, replacement screens and spare parts by category."}
           </p>
@@ -87,10 +89,10 @@ export function ProductCategories({
                 <Link
                   key={cat.id}
                   href={`/products?category=${cat.slug}`}
-                  className="card p-6 text-center card-hover group"
+                  className="card p-5 card-hover group"
                 >
                   <div
-                    className={`w-16 h-16 rounded-2xl ${colorClass} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}
+                    className={`w-12 h-12 rounded-xl ${colorClass} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}
                   >
                     {cat.image ? (
                       <OptimizedImage

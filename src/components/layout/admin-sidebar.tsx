@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils/cn";
 import toast from "react-hot-toast";
 const groups = [
   {
-    name: "Start here",
+    name: "Workspace",
     links: [
       ["Overview", "dashboard", LayoutDashboard],
       ["AI assistant", "ai-assistant", Sparkles],
@@ -125,7 +125,7 @@ export function AdminSidebar({
       <div className="px-4 pb-3 pt-4">
         <Input
           aria-label="Find a control"
-          placeholder="Search products, orders…"
+          placeholder="Find a workspace control…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -154,9 +154,9 @@ export function AdminSidebar({
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "my-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                      "my-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium",
                       active
-                        ? "bg-blue-600 text-white"
+                        ? "bg-lime-300 text-slate-950"
                         : "text-slate-200 hover:bg-slate-800",
                     )}
                   >
@@ -215,14 +215,17 @@ export function AdminSidebar({
           <Menu className="h-5 w-5" />
         </button>
       </header>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-slate-950 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-[#10262c] lg:flex">
         <Link
           href="/admin/dashboard"
           className="border-b border-slate-800 px-6 py-5 text-lg font-bold text-white"
         >
-          Mekfidel{" "}
+          mekfidel.
+          <span className="ml-2 rounded border border-white/20 px-1.5 py-0.5 align-middle text-[9px] font-medium uppercase tracking-wider text-lime-300">
+            Workspace
+          </span>{" "}
           <span className="block text-xs font-normal text-slate-400">
-            Your business workspace
+            COMMERCE & CONTENT
           </span>
         </Link>
         {navigation}
