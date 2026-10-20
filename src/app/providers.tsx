@@ -22,7 +22,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ToastProvider />
         <ContentSync />
         {!isAdmin && <Header />}
-        <main className={isAdmin ? "" : "min-h-screen"}>
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <main id="main-content" className={isAdmin ? "" : "min-h-screen"}>
           {!isAdmin && <PageText placement="top" />}
           {children}
           {!isAdmin && <PageText placement="bottom" />}

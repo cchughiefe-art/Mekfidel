@@ -1,6 +1,5 @@
 "use client";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-
 import { Modal } from "@/components/ui/modal";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -16,25 +15,22 @@ import {
   ShoppingCart,
   Search,
   Smartphone,
-  ChevronRight,
+  ArrowUpRight,
+  Package,
   Phone,
 } from "lucide-react";
-
 const defaultNavigation = [
-  { name: "Home", href: "/" },
-  { name: "Products", href: "/products" },
-  { name: "Phone Screen Compatibility", href: "/phone-screen-compatibility" },
-  { name: "Services", href: "/services" },
-  { name: "About", href: "/about" },
-  { name: "Blog", href: "/blog" },
-  { name: "Contact", href: "/contact" },
-  { name: "FAQ", href: "/faq" },
+  { name: "All products", href: "/products" },
+  { name: "Screen compatibility", href: "/phone-screen-compatibility" },
+  { name: "Supply services", href: "/services" },
+  { name: "About Mekfidel", href: "/about" },
+  { name: "Journal", href: "/blog" },
+  { name: "Help & FAQ", href: "/faq" },
 ];
-
+type NavigationLink = { name: string; href: string; is_new_tab?: boolean };
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const { totalItems, openCart } = useCart();
   const { data: settings } = useSettings();
@@ -46,7 +42,7 @@ export function Header() {
       return response.json();
     },
   });
-  const navigation =
+  const navigation: NavigationLink[] =
     menu === undefined
       ? defaultNavigation
       : menu.map(
@@ -56,190 +52,171 @@ export function Header() {
             is_new_tab: item.is_new_tab,
           }),
         );
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const isAdmin = pathname?.startsWith("/admin");
-
-  if (isAdmin) return null;
-
-  return (
-    <>
-      {/* Top Bar */}
-      <div className="hidden lg:block bg-gray-900 text-white text-sm">
-        <div className="container-custom flex items-center justify-between py-2">
-          <div className="flex items-center gap-6">
-            <a
-              href={`tel:${settings?.phone || "+2348000000000"}`}
-              className="flex items-center gap-1.5 hover:text-blue-300 transition-colors"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              {settings?.phone || "+234 800 000 0000"}
-            </a>
-            <span className="text-gray-500">|</span>
-            <span>{settings?.business_hours || "Mon - Sat: 8AM - 6PM"}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-400">
-              {settings?.company_name || "Mekfidel Communication Ltd"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Header */}
-      <header
+  const links = (mobile = false) =>
+    navigation.map((item) => (
+      <Link
+        key={item.href + item.name}
+        href={item.href}
+        onClick={() => setMenuOpen(false)}
+        target={item.is_new_tab ? "_blank" : undefined}
+        rel={item.is_new_tab ? "noopener noreferrer" : undefined}
+        aria-current={pathname === item.href ? "page" : undefined}
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-300",
-          isScrolled ? "bg-white/95 backdrop-blur-md shadow-sm" : "bg-white",
+          mobile
+            ? "block rounded-lg px-3 py-3 text-sm"
+            : "whitespace-nowrap py-3.5 text-xs font-semibold",
+          pathname === item.href
+            ? "text-slate-950 underline decoration-lime-400 decoration-2 underline-offset-8"
+            : "text-slate-500 hover:text-slate-950",
         )}
       >
-        <div className="container-custom">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5">
-              {settings?.logo ? (
-                <OptimizedImage
-                  src={settings.logo}
-                  alt={settings.company_name || "Mekfidel"}
-                  className="w-10 h-10 rounded-xl object-contain"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                  <Smartphone className="w-6 h-6 text-white" />
-                </div>
-              )}
-              <div>
-                <span className="text-lg font-bold text-gray-900 block leading-tight">
-                  Mekfidel
-                </span>
-                <span className="text-[10px] text-gray-500 block leading-tight tracking-wider uppercase">
-                  Communication
-                </span>
-              </div>
+        {item.name}
+      </Link>
+    ));
+  return (
+    <>
+      <div className="bg-slate-950 text-slate-300">
+        <div className="container-custom flex items-center justify-between gap-3 py-2.5 text-[11px]">
+          <p className="flex items-center gap-2">
+            <Package className="h-3.5 w-3.5 text-lime-300" />
+            Your repair supply partner
+          </p>
+          <Link href="/contact" className="flex items-center gap-2 text-white">
+            Talk to the team
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
+      </div>
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+        <div className="container-custom flex h-20 items-center gap-2 sm:gap-5 lg:gap-10">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-2.5"
+            aria-label="Mekfidel home"
+          >
+            {settings?.logo ? (
+              <OptimizedImage
+                src={settings.logo}
+                alt=""
+                className="hidden h-10 w-10 rounded-xl object-contain min-[380px]:block"
+              />
+            ) : (
+              <span className="hidden h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-lime-300 min-[380px]:flex">
+                <LayersLogo />
+              </span>
+            )}
+            <span>
+              <span className="block text-xl font-extrabold tracking-tight text-slate-950">
+                mekfidel<span className="text-lime-600">.</span>
+              </span>
+              <span className="block text-[8px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+                Communication Ltd
+              </span>
+            </span>
+          </Link>
+          <form
+            action="/search"
+            className="hidden max-w-xl flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 md:flex"
+          >
+            <Search className="h-4 w-4 text-slate-400" />
+            <input
+              name="q"
+              aria-label="Search parts, tools and models"
+              placeholder="Search parts, tools or a phone model…"
+              className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none"
+            />
+            <button
+              type="submit"
+              className="text-xs font-semibold text-slate-500"
+            >
+              Search
+            </button>
+          </form>
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/contact"
+              className="mr-3 hidden items-center gap-2 text-xs font-semibold text-slate-700 lg:flex"
+            >
+              <Phone className="h-4 w-4" />
+              Need a part?
             </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden xl:flex items-center gap-1">
-              {navigation.map(
-                (item: {
-                  name: string;
-                  href: string;
-                  is_new_tab?: boolean;
-                }) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== "/" && pathname?.startsWith(item.href));
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      target={item.is_new_tab ? "_blank" : undefined}
-                      rel={item.is_new_tab ? "noopener noreferrer" : undefined}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                        isActive
-                          ? "text-blue-600 bg-blue-50"
-                          : "text-gray-600 hover:text-blue-600 hover:bg-blue-50",
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                },
-              )}
-            </nav>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5 text-gray-600" />
-              </button>
-
-              <button
-                onClick={openCart}
-                className="relative p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
-                aria-label={`Cart with ${totalItems} items`}
-              >
-                <ShoppingCart className="w-5 h-5 text-gray-600" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {totalItems > 99 ? "99+" : totalItems}
-                  </span>
-                )}
-              </button>
-
-              {/* Mobile Menu Toggle */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="xl:hidden p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
-                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="w-5 h-5 text-gray-600" />
-                ) : (
-                  <Menu className="w-5 h-5 text-gray-600" />
-                )}
-              </button>
-            </div>
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search the catalogue"
+              className="rounded-xl p-3 hover:bg-slate-100 md:hidden"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+            <button
+              onClick={openCart}
+              aria-label={`Cart with ${totalItems} items`}
+              className="flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-3 text-white"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden text-xs font-semibold sm:inline">
+                Order desk
+              </span>
+              <span className="flex h-5 min-w-5 items-center justify-center rounded bg-lime-300 px-1 text-[10px] font-bold text-slate-950">
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            </button>
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open navigation"
+              aria-expanded={menuOpen}
+              className="rounded-xl p-3 hover:bg-slate-100 lg:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            "xl:hidden overflow-hidden transition-all duration-300",
-            isMobileMenuOpen
-              ? "max-h-[600px] opacity-100"
-              : "max-h-0 opacity-0",
-          )}
-        >
-          <div className="container-custom pb-4 border-t border-gray-100 pt-2">
-            <nav className="space-y-1">
-              {navigation.map(
-                (item: {
-                  name: string;
-                  href: string;
-                  is_new_tab?: boolean;
-                }) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      target={item.is_new_tab ? "_blank" : undefined}
-                      rel={item.is_new_tab ? "noopener noreferrer" : undefined}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                        isActive
-                          ? "text-blue-600 bg-blue-50"
-                          : "text-gray-600 hover:bg-gray-50",
-                      )}
-                    >
-                      {item.name}
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  );
-                },
-              )}
-            </nav>
-          </div>
+        <div className="hidden border-t border-slate-100 lg:block">
+          <nav
+            aria-label="Main navigation"
+            className="container-custom flex items-center gap-7 overflow-x-auto"
+          >
+            {links()}
+            <Link
+              href="/contact"
+              className="ml-auto whitespace-nowrap text-xs font-semibold"
+            >
+              Contact
+              <ArrowUpRight className="ml-1 inline h-3 w-3" />
+            </Link>
+          </nav>
         </div>
       </header>
-
-      {/* Search Overlay */}
-      {isSearchOpen && <SearchOverlay onClose={() => setIsSearchOpen(false)} />}
+      <Modal
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title="Explore Mekfidel"
+      >
+        <nav aria-label="Mobile navigation">
+          {links(true)}
+          <Link
+            href="/contact"
+            className="block px-3 py-3"
+            onClick={() => setMenuOpen(false)}
+          >
+            Contact the team
+          </Link>
+        </nav>
+      </Modal>
+      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
     </>
+  );
+}
+function LayersLogo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden="true">
+      <path
+        d="m4 8 8-4 8 4-8 4-8-4Zm0 5 8 4 8-4M4 18l8 4 8-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

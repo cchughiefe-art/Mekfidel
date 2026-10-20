@@ -124,6 +124,7 @@ export default function EditProductPage() {
           images,
         },
         String(params.id),
+        product,
       );
       await queryClient.invalidateQueries();
       toast.success("Product updated");

@@ -50,14 +50,14 @@ const checkout = async (payload = body(), key = crypto.randomUUID()) =>
       [JSON.stringify(payload), key],
     )
   ).rows[0].result;
-it("reserves stock once for retried checkout and only counts delivered sales", async () => {
+it("does not reserve pending requests and only counts delivered sales", async () => {
   const key = crypto.randomUUID();
   const order = await checkout(body(), key);
   expect((await checkout(body(), key)).id).toBe(order.id);
   expect(
     (await db.query<{ stock: number }>("select stock from products")).rows[0]
       .stock,
-  ).toBe(1);
+  ).toBe(2);
   expect(
     (
       await db.query<{ total_spent: string }>(
@@ -92,6 +92,9 @@ it("aggregates duplicate lines and atomically rejects overselling", async () => 
 });
 it("returns stock on cancellation once and rejects terminal transitions", async () => {
   const order = await checkout();
+  await db.query(`update orders set status='confirmed' where id=$1`, [
+    order.id,
+  ]);
   await db.query(`update orders set status='cancelled' where id=$1`, [
     order.id,
   ]);
@@ -293,6 +296,9 @@ it("protects the last administrator and rejects editors running privileged actio
 it("does not create phantom stock when cancelling pre-orders", async () => {
   await db.query(`update products set availability='pre_order',stock=0`);
   const order = await checkout();
+  await db.query(`update orders set status='confirmed' where id=$1`, [
+    order.id,
+  ]);
   await db.query(`update orders set status='cancelled' where id=$1`, [
     order.id,
   ]);
@@ -300,4 +306,126 @@ it("does not create phantom stock when cancelling pre-orders", async () => {
     (await db.query<{ stock: number }>("select stock from products")).rows[0]
       .stock,
   ).toBe(0);
+});
+
+it("reserves only on confirmation and rejects competing confirmations atomically", async () => {
+  const first = await checkout(body(2));
+  const second = await checkout(body(2));
+  expect(
+    (await db.query<{ stock: number }>("select stock from products")).rows[0]
+      .stock,
+  ).toBe(2);
+  await db.query("update orders set status='confirmed' where id=$1", [
+    first.id,
+  ]);
+  expect(
+    (await db.query<{ stock: number }>("select stock from products")).rows[0]
+      .stock,
+  ).toBe(0);
+  await expect(
+    db.query("update orders set status='confirmed' where id=$1", [second.id]),
+  ).rejects.toThrow("stock");
+  expect(
+    (
+      await db.query<{ status: string }>(
+        "select status from orders where id=$1",
+        [second.id],
+      )
+    ).rows[0].status,
+  ).toBe("pending");
+});
+it("rejects a stale form snapshot after an order reserves inventory", async () => {
+  const original = (
+    await db.query<{ value: Record<string, unknown> }>(
+      "select to_jsonb(p) value from products p",
+    )
+  ).rows[0].value;
+  const order = await checkout();
+  await db.query("update orders set status='confirmed' where id=$1", [
+    order.id,
+  ]);
+  const request = crypto.randomUUID();
+  await db.query(
+    "insert into ai_change_requests(id,created_by,instruction,summary,actions) values($1,$2,'Edit name','Edit',$3)",
+    [
+      request,
+      user,
+      JSON.stringify([
+        {
+          operation: "update",
+          resource: "products",
+          targetId: id,
+          changes: { name: "New name", stock: 2 },
+          expected: original,
+        },
+      ]),
+    ],
+  );
+  await expect(
+    db.query("select execute_admin_preview($1,$2,false)", [request, user]),
+  ).rejects.toThrow("Record changed");
+  expect(
+    (await db.query<{ stock: number }>("select stock from products")).rows[0]
+      .stock,
+  ).toBe(1);
+});
+it("allows preview apply and undo after analytics-only changes", async () => {
+  const original = (
+    await db.query<{ value: Record<string, unknown> }>(
+      "select to_jsonb(p) value from products p",
+    )
+  ).rows[0].value;
+  const request = crypto.randomUUID();
+  await db.query(
+    "insert into ai_change_requests(id,created_by,instruction,summary,actions) values($1,$2,'Edit price','Edit',$3)",
+    [
+      request,
+      user,
+      JSON.stringify([
+        {
+          operation: "update",
+          resource: "products",
+          targetId: id,
+          changes: { price: 1200 },
+          expected: original,
+        },
+      ]),
+    ],
+  );
+  await db.query("select increment_product_views($1)", [id]);
+  await db.query("select execute_admin_preview($1,$2,false)", [request, user]);
+  await db.query("select increment_product_views($1)", [id]);
+  await db.query("select execute_admin_preview($1,$2,true)", [request, user]);
+  const row = (
+    await db.query<{ price: string; views: number }>(
+      "select price,views from products",
+    )
+  ).rows[0];
+  expect(Number(row.price)).toBe(1000);
+  expect(row.views).toBe(2);
+});
+it("keeps existing legacy reservations when confirming without double-decrementing", async () => {
+  const order = await checkout();
+  await db.query("update orders set inventory_reserved=true where id=$1", [
+    order.id,
+  ]);
+  await db.query(
+    "update order_items set stock_reserved=true where order_id=$1",
+    [order.id],
+  );
+  await db.query("update products set stock=1 where id=$1", [id]);
+  await db.query("update orders set status='confirmed' where id=$1", [
+    order.id,
+  ]);
+  expect(
+    (await db.query<{ stock: number }>("select stock from products")).rows[0]
+      .stock,
+  ).toBe(1);
+  await db.query("update orders set status='cancelled' where id=$1", [
+    order.id,
+  ]);
+  expect(
+    (await db.query<{ stock: number }>("select stock from products")).rows[0]
+      .stock,
+  ).toBe(2);
 });

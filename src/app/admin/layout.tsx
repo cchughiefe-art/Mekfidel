@@ -1,3 +1,4 @@
+import { AdminTopbar } from "@/components/layout/admin-topbar";
 import { AdminErrors } from "@/components/layout/admin-errors";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -27,10 +28,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="admin-workspace min-h-screen">
       <AdminSidebar role={role} />
       <div className="lg:ml-64 min-h-screen">
-        <div className="pt-20 lg:pt-0 p-4 lg:p-8">
+        <div className="mx-auto max-w-[1600px] p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8 lg:pt-6">
+          <AdminTopbar role={role} />
           <AdminErrors />
           {children}
         </div>

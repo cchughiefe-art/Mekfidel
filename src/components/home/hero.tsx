@@ -1,109 +1,164 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowRight, Smartphone, Shield, Truck } from "lucide-react";
-import { useSettings } from "@/hooks/use-supabase-query";
+import {
+  ArrowUpRight,
+  ScanLine,
+  Wrench,
+  Layers3,
+  ArrowRight,
+  Check,
+} from "lucide-react";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { safeUrl } from "@/lib/utils/safe-content";
 
-export function HeroSection() {
-  const { data: settings } = useSettings();
-
+type HeroProps = {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+};
+export function HeroSection({
+  title,
+  subtitle,
+  description,
+  image,
+  buttonText,
+  buttonUrl,
+}: HeroProps = {}) {
   return (
-    <section className="relative overflow-hidden gradient-hero min-h-[90vh] flex items-center">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl" />
-      </div>
-
-      <div className="container-custom relative z-10 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-              <Shield className="w-4 h-4" />
-              <span>Phone Repair Tools & Parts</span>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-              {settings?.homepage_hero_title || (
+    <section className="store-hero">
+      <div className="container-custom py-12 sm:py-16 lg:py-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
+          <div className="relative z-10">
+            <p className="eyebrow mb-6 text-lime-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-lime-300" /> THE
+              REPAIR SUPPLY DESK
+            </p>
+            <h1 className="max-w-2xl text-[2.75rem] font-semibold leading-[1.06] tracking-[-0.055em] text-white sm:text-6xl xl:text-7xl">
+              {title || (
                 <>
-                  Your Premium
-                  <span className="text-yellow-400"> Repair Tools</span>{" "}
-                  Destination
+                  Better parts.
+                  <br />
+                  Better <span className="text-lime-300">repairs.</span>
                 </>
               )}
             </h1>
-
-            <p className="text-lg md:text-xl text-blue-100 max-w-xl leading-relaxed">
-              {settings?.homepage_hero_subtitle ||
-                "Browse phone repair tools, replacement screens and spare parts."}
+            <p className="mt-6 max-w-lg text-base leading-7 text-slate-300 sm:text-lg">
+              {description ||
+                subtitle ||
+                "Replacement screens, specialist tools and spare parts. Find what fits, build your order, and confirm the details with our team."}
             </p>
-
-            <div className="flex flex-wrap gap-4">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/products"
-                className="bg-white text-blue-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all shadow-xl flex items-center gap-2"
+                href={safeUrl(buttonUrl || "/products")}
+                className="inline-flex items-center gap-5 rounded-xl bg-lime-300 px-6 py-3.5 text-sm font-bold text-slate-950 hover:bg-lime-200"
               >
-                Shop Now
-                <ArrowRight className="w-5 h-5" />
+                {buttonText || "Explore the catalogue"}
+                <ArrowUpRight className="h-5 w-5" />
               </Link>
               <Link
-                href="/services"
-                className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-all"
+                href="/phone-screen-compatibility"
+                className="inline-flex items-center gap-3 rounded-xl border border-white/20 px-5 py-3.5 text-sm font-medium text-white hover:bg-white/10"
               >
-                Our Services
+                <ScanLine className="h-5 w-5" />
+                Find a screen match
               </Link>
             </div>
-
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap gap-8 pt-8 border-t border-white/20">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Smartphone className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold">100+</p>
-                  <p className="text-blue-200 text-sm">Parts & Tools</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold">Quality</p>
-                  <p className="text-blue-200 text-sm">Genuine Parts</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold">Delivery</p>
-                  <p className="text-blue-200 text-sm">Nationwide</p>
-                </div>
-              </div>
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-300">
+              {[
+                "Model compatibility help",
+                "Staff-confirmed orders",
+                "Prices in naira",
+              ].map((text) => (
+                <span key={text} className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-lime-300" />
+                  {text}
+                </span>
+              ))}
             </div>
           </div>
-
-          {/* Right Image */}
-          <div className="hidden lg:flex justify-center">
-            <div className="relative">
-              <div className="w-96 h-96 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-                <Smartphone className="w-48 h-48 text-white/30" />
+          <div className="hero-display relative min-h-[350px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] sm:min-h-[420px]">
+            <div className="absolute left-6 top-5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-lime-300" />
+              Parts. Precision. Possibility.
+            </div>
+            {image ? (
+              <OptimizedImage
+                src={safeUrl(image, "")}
+                alt={title || "Repair tools and replacement parts"}
+                loading="eager"
+                className="absolute inset-0 h-full w-full object-contain p-12"
+              />
+            ) : (
+              <div aria-hidden="true" className="parts-art">
+                <div className="parts-plate plate-back" />
+                <div className="parts-plate plate-middle">
+                  <div className="board-chip" />
+                  <span className="board-track" />
+                </div>
+                <div className="parts-plate plate-screen">
+                  <div className="screen-island" />
+                  <div className="screen-orbit" />
+                  <span className="screen-word">
+                    MAKE IT
+                    <br />
+                    WORK.
+                  </span>
+                  <span className="screen-small">MEKFIDEL / PARTS & TOOLS</span>
+                </div>
+                <div className="tool-driver" />
               </div>
-              {/* Floating Cards */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-4 shadow-xl animate-bounce-slow">
-                <p className="text-2xl font-bold text-blue-600">NEW</p>
-                <p className="text-xs text-gray-500">Latest Arrivals</p>
+            )}
+            <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-xl border border-white/10 bg-slate-950/80 p-4 backdrop-blur">
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  The right part starts here.
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Check your model before you order.
+                </p>
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-4 shadow-xl">
-                <p className="text-2xl font-bold text-green-600">-30%</p>
-                <p className="text-xs text-gray-500">Special Offer</p>
-              </div>
+              <ScanLine className="h-7 w-7 text-lime-300" />
             </div>
           </div>
+        </div>
+      </div>
+      <div className="border-t border-white/10 bg-white/[0.025]">
+        <div className="container-custom grid divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {[
+            {
+              icon: Layers3,
+              title: "Replacement screens",
+              text: "Find your next screen assembly",
+              url: "/products",
+            },
+            {
+              icon: Wrench,
+              title: "Tools for your workbench",
+              text: "Equip your next repair",
+              url: "/products",
+            },
+            {
+              icon: ScanLine,
+              title: "Check before you buy",
+              text: "Explore model compatibility",
+              url: "/phone-screen-compatibility",
+            },
+          ].map(({ icon: Icon, ...item }) => (
+            <Link
+              key={item.title}
+              href={item.url}
+              className="group flex items-center gap-4 px-2 py-5 sm:px-6"
+            >
+              <Icon className="h-6 w-6 shrink-0 text-lime-300" />
+              <div>
+                <p className="text-sm font-semibold text-white">{item.title}</p>
+                <p className="mt-1 text-xs text-slate-400">{item.text}</p>
+              </div>
+              <ArrowRight className="ml-auto h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1" />
+            </Link>
+          ))}
         </div>
       </div>
     </section>

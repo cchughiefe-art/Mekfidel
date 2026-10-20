@@ -74,7 +74,12 @@ export default function AdminBlogPage() {
           : null,
       };
 
-      await saveAdminRecord("blog_posts", postData, editing?.id);
+      await saveAdminRecord(
+        "blog_posts",
+        postData,
+        editing?.id,
+        editing || undefined,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries();

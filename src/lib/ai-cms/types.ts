@@ -32,6 +32,7 @@ export const aiActionSchema = z
     targetId: z.string().uuid().optional(),
     targetLabel: z.string().min(1).max(200),
     changes: z.record(z.string(), z.unknown()).default({}),
+    original: z.record(z.string(), z.unknown()).optional(),
   })
   .superRefine((action, context) => {
     if (action.operation !== "create" && !action.targetId) {

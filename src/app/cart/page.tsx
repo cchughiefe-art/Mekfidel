@@ -1,7 +1,7 @@
 "use client";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -23,6 +23,13 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 import type { z } from "zod";
+
+import {
+  PENDING_CHECKOUT_KEY,
+  persistCheckout,
+  readPendingCheckout,
+  type PendingCheckout,
+} from "@/lib/utils/pending-checkout";
 
 type OrderFormData = z.infer<typeof orderSchema>;
 
@@ -76,7 +83,23 @@ export default function CartPage() {
     clearCart,
     refreshCart,
   } = useCart();
-  const orderKey = useRef<{ key: string; body: string } | null>(null);
+  const orderKey = useRef<PendingCheckout | null>(null);
+  const submitting = useRef(false);
+  const [pending, setPending] = useState<PendingCheckout | null>(null);
+  const [recoveryError, setRecoveryError] = useState("");
+  useEffect(() => {
+    try {
+      const saved = readPendingCheckout(sessionStorage);
+      orderKey.current = saved;
+      // The first browser render restores tab-scoped recovery data after SSR.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPending(saved);
+    } catch {
+      setRecoveryError(
+        "Your saved order could not be read. Contact the shop before submitting again if an earlier request was interrupted.",
+      );
+    }
+  }, []);
   const [receipt, setReceipt] = useState<{ id: string; total: number } | null>(
     null,
   );
@@ -90,12 +113,69 @@ export default function CartPage() {
     resolver: zodResolver(orderSchema),
   });
 
+  const sendPending = async (submission: PendingCheckout) => {
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": submission.key,
+      },
+      body: JSON.stringify(submission.body),
+    });
+    const result = await res.json().catch(() => null);
+    if (!res.ok) {
+      // A validation/conflict rejection is a known non-commit. Network errors,
+      // throttles and service failures retain the exact request for recovery.
+      if (res.status === 400 || res.status === 409 || res.status === 413) {
+        sessionStorage.removeItem(PENDING_CHECKOUT_KEY);
+        orderKey.current = null;
+        setPending(null);
+        if (res.status === 409) await refreshCart();
+      }
+      throw new Error(
+        result?.error ||
+          "Could not confirm the result. Use Recover order to retry safely.",
+      );
+    }
+    if (!result?.order?.id)
+      throw new Error(
+        "Order response was incomplete. Recover it using the same reference.",
+      );
+    setReceipt(result.order);
+    clearCart();
+    sessionStorage.removeItem(PENDING_CHECKOUT_KEY);
+    orderKey.current = null;
+    setPending(null);
+    toast.success(
+      "Order request received. Stock is reserved after staff confirmation.",
+    );
+  };
+  const recover = async () => {
+    if (!orderKey.current || submitting.current) return;
+    submitting.current = true;
+    setIsSubmitting(true);
+    try {
+      await sendPending(orderKey.current);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Recovery failed. Try again.",
+      );
+    } finally {
+      submitting.current = false;
+      setIsSubmitting(false);
+    }
+  };
   const onSubmit = async (data: OrderFormData) => {
-    if (items.length === 0) {
+    if (orderKey.current) {
+      await recover();
+      return;
+    }
+    if (submitting.current || recoveryError) return;
+    if (!items.length) {
       toast.error("Your cart is empty");
       return;
     }
-
+    submitting.current = true;
     setIsSubmitting(true);
     try {
       if (await refreshCart()) {
@@ -104,7 +184,7 @@ export default function CartPage() {
         );
         return;
       }
-      const orderData = {
+      const body = {
         ...data,
         items: items.map((item) => ({
           product_id: item.product.id,
@@ -112,42 +192,60 @@ export default function CartPage() {
           expected_price: Number(item.product.price),
         })),
       };
-
-      const encoded = JSON.stringify(orderData);
-      if (!orderKey.current || orderKey.current.body !== encoded)
-        orderKey.current = { key: crypto.randomUUID(), body: encoded };
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": orderKey.current.key,
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (res.status === 409) await refreshCart();
-      if (!res.ok) {
-        const result = await res.json().catch(() => null);
-        throw new Error(result?.error || "Failed to submit order");
+      // Persist before sending: a tab reload must replay the same key and body.
+      let submission: PendingCheckout;
+      try {
+        submission = persistCheckout(sessionStorage, body);
+      } catch {
+        throw new Error(
+          "Enable browser storage to submit and safely recover your order.",
+        );
       }
-
-      const result = await res.json();
-      setReceipt(result.order);
-      clearCart();
-      toast.success(
-        "Order submitted successfully! We will contact you shortly.",
-      );
-      orderKey.current = null;
+      orderKey.current = submission;
+      setPending(submission);
+      await sendPending(submission);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to submit order. Please try again.",
+          : "Order interrupted. Recover it safely below.",
       );
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   };
+  const recoveryPanel = (pending || recoveryError) && (
+    <section className="container-custom py-6" aria-live="polite">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+        <h2 className="font-semibold">
+          {recoveryError
+            ? "Check your previous request"
+            : "An order request needs confirmation"}
+        </h2>
+        <p className="mt-2 text-sm">
+          {recoveryError ||
+            "Recover the original request before starting another. This safely checks or resends the same order without duplicating it."}
+        </p>
+        {pending && (
+          <>
+            <p className="mt-2 break-all font-mono text-xs">
+              Reference: {pending.key}
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              className="mt-4"
+              loading={isSubmitting}
+              onClick={recover}
+            >
+              Recover order
+            </Button>
+          </>
+        )}
+      </div>
+    </section>
+  );
 
   if (receipt)
     return (
@@ -164,7 +262,8 @@ export default function CartPage() {
           <p className="my-5 text-gray-600">
             This is a request for confirmation, not a payment receipt. Our team
             will confirm availability, delivery cost and payment arrangements
-            before processing.
+            before processing. Inventory is reserved only after our team
+            confirms the order.
           </p>
           <Link href="/products" className="btn-primary">
             Continue browsing
@@ -172,6 +271,8 @@ export default function CartPage() {
         </div>
       </section>
     );
+
+  if (items.length === 0 && (pending || recoveryError)) return recoveryPanel;
 
   if (items.length === 0) {
     return (
@@ -199,8 +300,11 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {recoveryPanel}
       <div className="container-custom py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Your order desk
+        </h1>
 
         <div className="grid lg:grid-cols-5 gap-8">
           {/* Order Form */}
@@ -377,6 +481,7 @@ export default function CartPage() {
                 type="submit"
                 form="order-form"
                 loading={isSubmitting}
+                disabled={!!recoveryError || !!pending}
               >
                 <Send className="w-5 h-5 mr-2" />
                 Request order confirmation

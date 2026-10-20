@@ -29,20 +29,20 @@ export function ProductCard({
   return (
     <div
       className={cn(
-        "group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden",
-        "hover:shadow-xl hover:-translate-y-1 transition-all duration-300",
+        "group flex flex-col bg-white rounded-2xl border border-gray-200 overflow-hidden",
+        "hover:border-slate-400 hover:shadow-lg transition-all duration-300",
         className,
       )}
     >
       <Link
         href={`/products/${product.slug}`}
-        className="block relative aspect-square overflow-hidden bg-gray-50"
+        className="block relative aspect-[1.1] overflow-hidden bg-gray-50"
       >
         {imageUrl ? (
           <OptimizedImage
             src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain p-5 group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
         ) : (
@@ -69,7 +69,7 @@ export function ProductCard({
         )}
       </Link>
 
-      <div className="p-4 space-y-3">
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
         {product.brand && (
           <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
             {product.brand.name}
@@ -86,9 +86,9 @@ export function ProductCard({
           <p className="text-xs text-gray-400">{product.category.name}</p>
         )}
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
           <div>
-            <span className="text-xl font-bold text-gray-900">
+            <span className="text-lg font-bold tracking-tight text-gray-900">
               {formatPrice(product.price)}
             </span>
             {Number(product.compare_price) > 0 &&

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { loginSchema } from '@/lib/utils/validators';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Smartphone, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { loginSchema } from "@/lib/utils/validators";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Smartphone, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 type LoginData = { email: string; password: string };
 
@@ -19,7 +19,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
   });
 
@@ -34,25 +38,33 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      toast.success('Welcome back!');
-      const destination = new URLSearchParams(window.location.search).get('next');
-      router.push(destination?.startsWith('/admin') ? destination : '/admin/dashboard');
+      toast.success("Welcome back!");
+      const destination = new URLSearchParams(window.location.search).get(
+        "next",
+      );
+      router.push(
+        destination?.startsWith("/admin") ? destination : "/admin/dashboard",
+      );
       router.refresh();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Invalid credentials');
+      toast.error(
+        error instanceof Error ? error.message : "Invalid credentials",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f4f6f3] flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mx-auto mb-4">
             <Smartphone className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+            Admin Login
+          </h1>
           <p className="text-gray-500 mt-1">Sign in to your dashboard</p>
         </div>
 
@@ -62,15 +74,15 @@ export default function LoginPage() {
               label="Email Address"
               type="email"
               placeholder="admin@example.com"
-              {...register('email')}
+              {...register("email")}
               error={errors.email?.message}
             />
             <div className="relative">
               <Input
                 label="Password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                {...register('password')}
+                {...register("password")}
                 error={errors.password?.message}
               />
               <button
@@ -78,16 +90,29 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
-            <Button variant="primary" className="w-full" size="lg" type="submit" loading={loading}>
+            <Button
+              variant="primary"
+              className="w-full"
+              size="lg"
+              type="submit"
+              loading={loading}
+            >
               Sign In
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
               Forgot Password?
             </Link>
           </div>

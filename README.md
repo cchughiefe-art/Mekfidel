@@ -623,3 +623,9 @@ Create the first user in Supabase Auth, then assign its existing UUID an admin p
 Run `npm run lint -- --max-warnings 0`, `npm run typecheck`, `npm test` and `npm run build`. CI runs lint, types, tests and the production dependency audit without deployment credentials. Vercel performs the preview build. See `docs/AUDIT-REMEDIATION.md` for verified changes and remaining business decisions.
 
 Checkout submits an order request. Payment and delivery charges are confirmed with the shop; it does not collect a card payment. The former placeholder notification integration has been removed. No outbound order notification service is configured.
+
+## Storefront and operations overhaul (20 October 2026)
+
+The storefront and staff workspace now share a refreshed responsive design. Pending requests do not hold inventory; staff confirmation reserves stock atomically. Checkout can recover an interrupted submission in the same browser tab. Product/blog edits support original-snapshot conflict protection, analytics counters no longer invalidate previews, and newsletter writes have source/global budgets.
+
+Apply `supabase/migrations/20261020090000_enterprise_inventory_and_conflicts.sql` before deploying this version. See `docs/ENTERPRISE-OVERHAUL.md` for fresh-install order, migration rollout, inventory semantics, testing, and operational limits.

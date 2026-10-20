@@ -1,3 +1,4 @@
+import { HeroSection } from "@/components/home/hero";
 import { cloneElement } from "react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import Link from "next/link";
@@ -41,6 +42,9 @@ export default async function HomePage() {
     throw new Error("Homepage content could not be loaded");
   return (
     <>
+      {!(sections.data || []).some(
+        (section) => section.section_type === "hero",
+      ) && <HeroSection />}
       {(sections.data || [])
         .filter((section) => section.is_active)
         .map((section) => {
@@ -54,6 +58,18 @@ export default async function HomePage() {
               </div>
             );
           const hero = section.section_type === "hero";
+          if (hero)
+            return (
+              <HeroSection
+                key={section.id}
+                title={section.title || undefined}
+                subtitle={section.subtitle || undefined}
+                description={section.description || undefined}
+                image={section.image || section.background_image || undefined}
+                buttonText={section.button_text || undefined}
+                buttonUrl={section.button_url || undefined}
+              />
+            );
           const features = (cards.data || []).filter(
             (card) => card.section_id === section.id,
           );
